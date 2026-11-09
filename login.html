@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="login.css">
 </head>
 <body class="auth-body">
   <div class="auth-container">
@@ -16,10 +16,7 @@
     <!-- Sign In Card (matches exact wireframe: CleanRide, Welcome, email, password, Sign in, Don't have account? Sign up) -->
     <div class="auth-card" id="signinBox">
       <div class="auth-header">
-        <div class="auth-brand-icon">
-          <i class="fa-solid fa-wand-magic-sparkles"></i>
-        </div>
-        <h1 class="brand-title-large">CleanRide</h1>
+        <img src="cleanride-logo.png" alt="CleanRide Logo" class="auth-brand-img">
         <h2 class="auth-subtitle">Welcome</h2>
         <p class="auth-caption">Sign in to book upholstery, carpet & vehicle cleaning</p>
       </div>
@@ -71,10 +68,7 @@
     <!-- Sign Up Card -->
     <div class="auth-card" id="signupBox" style="display: none;">
       <div class="auth-header">
-        <div class="auth-brand-icon">
-          <i class="fa-solid fa-wand-magic-sparkles"></i>
-        </div>
-        <h1 class="brand-title-large">CleanRide</h1>
+        <img src="cleanride-logo.png" alt="CleanRide Logo" class="auth-brand-img">
         <h2 class="auth-subtitle">Create Account</h2>
         <p class="auth-caption">Join CleanRide for fast mobile upholstery services</p>
       </div>
@@ -149,10 +143,10 @@
         showToast(`Welcome back, ${res.user.fullName}! Redirecting...`, 'success');
         setTimeout(() => {
           if (res.user.role === 'customer') {
-            window.location.href = 'customer.html';
+            window.location.href = 'customer/customer.html';
           } else {
             // For now if owner, alert or redirect
-            window.location.href = 'customer.html'; // Or owner page when created
+            window.location.href = 'customer/customer.html'; // Or owner page when created
           }
         }, 600);
       } else {
@@ -170,7 +164,7 @@
       if (res.success) {
         showToast(`Account created for ${res.user.fullName}! Redirecting to customer portal...`, 'success');
         setTimeout(() => {
-          window.location.href = 'customer.html';
+          window.location.href = 'customer/customer.html';
         }, 650);
       } else {
         showToast(res.message, 'danger');

@@ -6,11 +6,15 @@ Designed specifically in accordance with the **CleanRide Management System speci
 
 ---
 
-## 🎨 Theme & Visual Design
-- **Theme**: Soft Blue Modern Upholstery Cleaning (`#0ea5e9`, `#0284c7`, `#f0f9ff`, slate navy `#0f172a`).
+## 🎨 Theme & Visual Design System
+- **Theme**: Soft Blue Modern Upholstery Cleaning (`#0ea5e9`, `#0284c7`, `#f0f9ff`, deep navy sidebar `#112d42`, slate navy `#0f172a`).
 - **Typography**: Google Font *Plus Jakarta Sans*.
 - **Iconography**: FontAwesome 6 Pro-style icons.
-- **Visuals**: Glassmorphism navigation bar, responsive pricing sidebar, interactive cards, status chips, and real-time toast alerts.
+- **Layout & Full-Bleed Alignment**: Sidebar is docked flush to the far-left edge of the screen (`0px` left margin gap across all screen sizes).
+- **Geometric Design Standard (Strict Sharp Corners)**:
+  - **All rectangles must have 100% sharp corners** (`border-radius: 0 !important`).
+  - No rounded or bubbly corners on cards, buttons, badges, modals, profile boxes, inputs, or pop-outs.
+  - Applies universally to `login.html`, `customer.html`, and all future interface files.
 
 ---
 
