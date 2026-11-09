@@ -280,7 +280,10 @@ function renderHome() {
   if (badgeEl) badgeEl.textContent = apptCount;
   if (homeBadge) homeBadge.textContent = `${apptCount} Scheduled`;
 
-  // Upcoming appoint strip list
+  // 1. Render Recent Bookings Table (Exact User Design)
+  renderRecentBookingsTable(myJobs);
+
+  // 2. Upcoming appoint strip list
   const upcomingContainer = document.getElementById('homeUpcomingList');
   if (upcomingContainer) {
     if (myJobs.length === 0) {
@@ -309,7 +312,7 @@ function renderHome() {
     }
   }
 
-  // Report strip list
+  // 3. Report strip list
   const reportContainer = document.getElementById('homeReportList');
   const pendingReportCount = myComplaints.filter(c => c.status !== 'Resolved').length;
   const sideReportBadge = document.getElementById('sideReportBadge');
@@ -344,6 +347,95 @@ function renderHome() {
       }).join('');
     }
   }
+}
+
+/**
+ * Render Recent Bookings Table (matches exact uploaded image wireframe/design)
+ */
+function renderRecentBookingsTable(myJobs) {
+  const tbody = document.getElementById('homeRecentBookingsBody');
+  if (!tbody) return;
+
+  if (myJobs.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" class="rb-empty-cell">
+          <div class="rb-empty-state">
+            <button type="button" class="rb-empty-plus-btn" onclick="navigateTo('request')" title="Book Service">
+              <i class="fa-solid fa-plus"></i>
+            </button>
+            <h4 class="rb-empty-title">Nothing to show yet</h4>
+            <p class="rb-empty-caption">Bookings will appear here when they are created.</p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = myJobs.slice(0, 5).map(job => {
+    const formattedDate = formatDateDisplay(job.serviceDate);
+    const countdown = getCountdownBadge(job.serviceDate);
+    const detailsSummary = getJobDetailSummary(job);
+
+    return `
+      <tr class="rb-table-row">
+        <td>
+          <div class="rb-ref-cell">
+            <strong class="rb-ref-tag">${job.jobId}</strong>
+            <span class="rb-service-name">${job.serviceTitle}</span>
+          </div>
+        </td>
+        <td>
+          <div class="rb-detail-cell">
+            <span class="rb-detail-text">${detailsSummary}</span>
+            <small class="rb-dirtiness-sub">${capitalize(job.dirtinessLevel)} dirtiness &bull; ${job.dirtinessMultiplier}x</small>
+          </div>
+        </td>
+        <td>
+          <div class="rb-appt-cell">
+            <span class="rb-date-text"><i class="fa-regular fa-calendar"></i> ${formattedDate}</span>
+            <span class="rb-countdown-text">${countdown}</span>
+          </div>
+        </td>
+        <td>
+          <div class="rb-total-cell">
+            <strong class="rb-price-text">RM ${job.totalPrice.toFixed(2)}</strong>
+            <span class="rb-deposit-text"><i class="fa-solid fa-shield-check"></i> Dep: RM ${job.depositAmount.toFixed(2)}</span>
+          </div>
+        </td>
+        <td>
+          <div class="rb-status-cell">
+            <span class="badge ${getStatusBadgeClass(job.status)}">${job.status}</span>
+            <button type="button" class="btn btn-xs btn-outline-primary" onclick="viewAppointmentDetails('${job.jobId}')" title="View details">
+              <i class="fa-regular fa-file-lines"></i> Details
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function getJobDetailSummary(job) {
+  if (job.serviceCategory === 'vehicle') {
+    return `Plate: ${job.details?.vehiclePlate || 'VDK 4921'} (${capitalize(job.details?.vehicleType || 'Sedan')})`;
+  } else if (job.serviceCategory === 'furniture') {
+    const itemLabel = PRICING.furniture[job.details?.item]?.label || capitalize(job.details?.item || 'Sofa');
+    return `${itemLabel} (Qty: ${job.details?.qty || 1})`;
+  } else if (job.serviceCategory === 'carpet') {
+    return `Area: ${job.details?.area || 15} m² (${capitalize(job.details?.material || 'Standard')})`;
+  } else if (job.serviceCategory === 'rental') {
+    return `${job.details?.equipment || 'Spray Extractor'} (${job.details?.hours || 3} Hours)`;
+  }
+  return 'Mobile On-Site Cleaning';
+}
+
+function getStatusBadgeClass(status) {
+  if (status === 'Completed') return 'badge-success';
+  if (status === 'In Progress') return 'badge-warning';
+  if (status === 'Accepted' || status === 'Scheduled') return 'badge-info';
+  return 'badge-secondary';
 }
 
 /**
@@ -593,21 +685,64 @@ function confirmPaymentAndCreateJob() {
 /**
  * ================= 3. DISPLAY APPOINTMENT LIST VIEW =================
  */
+let currentApptFilter = 'all';
+
+function setApptFilter(filter) {
+  currentApptFilter = filter;
+  ['all', 'upcoming', 'completed'].forEach(f => {
+    const el = document.getElementById(`tabFilter${capitalize(f)}`);
+    if (el) el.classList.toggle('active', f === filter);
+  });
+  renderAppointmentList();
+}
+
 function renderAppointmentList() {
   const container = document.getElementById('appointmentListContainer');
   const title = document.getElementById('apptListTitle');
   if (!container) return;
 
-  const myJobs = jobs.filter(j => j.customerId === activeCustomer.id);
-  title.textContent = `You have ${myJobs.length} upcoming ${myJobs.length === 1 ? 'appointment' : 'appointments'}`;
+  const myJobs = jobs.filter(j => j.customerId === activeCustomer.id && j.status !== 'Rejected');
+  
+  // Calculate counts for tabs
+  const allCount = myJobs.length;
+  const upcomingCount = myJobs.filter(j => j.status !== 'Completed').length;
+  const completedCount = myJobs.filter(j => j.status === 'Completed').length;
 
-  if (myJobs.length === 0) {
+  const countAllEl = document.getElementById('tabCountAll');
+  const countUpEl = document.getElementById('tabCountUpcoming');
+  const countCompEl = document.getElementById('tabCountCompleted');
+
+  if (countAllEl) countAllEl.textContent = allCount;
+  if (countUpEl) countUpEl.textContent = upcomingCount;
+  if (countCompEl) countCompEl.textContent = completedCount;
+
+  if (title) {
+    title.textContent = `You have ${upcomingCount} upcoming ${upcomingCount === 1 ? 'appointment' : 'appointments'}`;
+  }
+
+  // Filter based on active tab
+  let filteredJobs = myJobs;
+  if (currentApptFilter === 'upcoming') {
+    filteredJobs = myJobs.filter(j => j.status !== 'Completed');
+  } else if (currentApptFilter === 'completed') {
+    filteredJobs = myJobs.filter(j => j.status === 'Completed');
+  }
+
+  if (filteredJobs.length === 0) {
     container.innerHTML = `
-      <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
-        <i class="fa-solid fa-calendar-xmark" style="font-size: 2.5rem; color: var(--slate-300); margin-bottom: 1rem;"></i>
-        <h3>No Appointments Scheduled</h3>
-        <p>You have not made any service bookings yet.</p>
-        <button class="btn btn-primary" style="margin-top: 1rem;" onclick="navigateTo('request')">
+      <div class="card empty-filter-card">
+        <div class="rb-empty-plus-btn" style="cursor: default;">
+          <i class="fa-solid fa-calendar-xmark"></i>
+        </div>
+        <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--slate-800); margin-bottom: 6px;">
+          ${currentApptFilter === 'all' ? 'No Appointments Scheduled' : `No ${capitalize(currentApptFilter)} Appointments`}
+        </h4>
+        <p style="color: var(--slate-500); font-size: 0.88rem; max-width: 400px; margin: 0 auto 1.25rem;">
+          ${currentApptFilter === 'all' 
+            ? 'You have not booked any mobile upholstery services yet.' 
+            : `There are currently no bookings with status "${currentApptFilter}".`}
+        </p>
+        <button class="btn btn-primary" onclick="navigateTo('request')">
           <i class="fa-solid fa-calendar-plus"></i> Request Service Now
         </button>
       </div>
@@ -615,9 +750,10 @@ function renderAppointmentList() {
     return;
   }
 
-  container.innerHTML = myJobs.map((job, idx) => {
+  container.innerHTML = filteredJobs.map((job, idx) => {
     const formattedDate = formatDateDisplay(job.serviceDate);
     const countdown = getCountdownBadge(job.serviceDate);
+    const detailSummary = getJobDetailSummary(job);
 
     return `
       <div class="appointment-row-card">
@@ -628,11 +764,14 @@ function renderAppointmentList() {
             ${countdown}
           </div>
           <h3 class="appt-service-name">${job.serviceTitle}</h3>
+          <div class="appt-detail-summary">
+            <i class="fa-solid fa-circle-info text-primary"></i> ${detailSummary} &bull; <small>${capitalize(job.dirtinessLevel)} (${job.dirtinessMultiplier}x)</small>
+          </div>
           <div class="appt-meta-pills">
             <span><i class="fa-solid fa-calendar"></i> ${formattedDate}</span>
             <span><i class="fa-solid fa-location-dot"></i> ${truncate(job.location, 35)}</span>
             <span><i class="fa-solid fa-receipt"></i> Total: <strong>RM ${job.totalPrice.toFixed(2)}</strong></span>
-            <span><i class="fa-solid fa-shield-check"></i> ${job.paymentStatus}</span>
+            <span><i class="fa-solid fa-shield-check text-success"></i> ${job.paymentStatus}</span>
           </div>
         </div>
 

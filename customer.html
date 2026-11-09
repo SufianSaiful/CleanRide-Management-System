@@ -84,6 +84,14 @@
         </button>
       </nav>
 
+      <!-- Bottom: Collapse menu (from user design image) -->
+      <div class="sidebar-bottom-bar">
+        <button type="button" class="sidebar-collapse-btn" onclick="toggleSidebar()" title="Collapse / Expand menu">
+          <span class="collapse-dot">&bull;</span>
+          <span class="collapse-text">Collapse menu</span>
+        </button>
+      </div>
+
     </aside>
 
     <!-- ================= MAIN SCROLLABLE CONTENT ================= -->
@@ -105,6 +113,37 @@
             <button class="btn btn-secondary" onclick="navigateTo('list')">
               <i class="fa-solid fa-list-ul"></i> View All Appointments
             </button>
+          </div>
+        </div>
+
+        <!-- ================= RECENT BOOKINGS CARD (EXACT USER DESIGN) ================= -->
+        <div class="card recent-bookings-card">
+          <div class="recent-bookings-header">
+            <div class="rb-title-group">
+              <h3 class="rb-heading">Recent bookings</h3>
+              <p class="rb-subheading">A quick look at your service history</p>
+            </div>
+            <a href="javascript:void(0)" onclick="navigateTo('list')" class="rb-history-link">
+              <span>Full history</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+
+          <div class="recent-bookings-table-wrapper">
+            <table class="recent-bookings-table">
+              <thead>
+                <tr>
+                  <th style="width: 25%;">REFERENCE / SERVICE</th>
+                  <th style="width: 27%;">SERVICE DETAILS</th>
+                  <th style="width: 20%;">APPOINTMENT</th>
+                  <th style="width: 14%;">TOTAL</th>
+                  <th style="width: 14%;">STATUS</th>
+                </tr>
+              </thead>
+              <tbody id="homeRecentBookingsBody">
+                <!-- Populated dynamically via customer.js -->
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -429,8 +468,26 @@
             <h2 id="apptListTitle">You have 0 upcoming appointment</h2>
             <p>Track scheduled cleaning appointments, owner contacts, and days countdown.</p>
           </div>
-          <button class="btn btn-secondary" onclick="renderAppointmentList()">
-            <i class="fa-solid fa-rotate-right"></i> Refresh
+          <div class="list-header-actions">
+            <button class="btn btn-secondary" onclick="renderAppointmentList()">
+              <i class="fa-solid fa-rotate-right"></i> Refresh
+            </button>
+            <button class="btn btn-primary" onclick="navigateTo('request')">
+              <i class="fa-solid fa-plus"></i> New Booking
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="list-filter-tabs">
+          <button type="button" class="filter-tab active" id="tabFilterAll" onclick="setApptFilter('all')">
+            All Bookings (<span id="tabCountAll">0</span>)
+          </button>
+          <button type="button" class="filter-tab" id="tabFilterUpcoming" onclick="setApptFilter('upcoming')">
+            Upcoming (<span id="tabCountUpcoming">0</span>)
+          </button>
+          <button type="button" class="filter-tab" id="tabFilterCompleted" onclick="setApptFilter('completed')">
+            Completed (<span id="tabCountCompleted">0</span>)
           </button>
         </div>
 
@@ -505,23 +562,17 @@
     </main>
   </div>
 
-  <!-- ================= BOTTOM FOOTER (SWAPPED WITH HEADER) ================= -->
-  <!-- Requirement: Header information moved to Footer (Full company name, address, no phone) -->
+  <!-- ================= BOTTOM FOOTER (MATCHES USER DESIGN IMAGE) ================= -->
   <footer class="app-bottom-footer">
     <div class="footer-layout">
       <div class="footer-company-info">
-        <h2 class="footer-company-name">CleanRide Management System Sdn. Bhd.</h2>
-        <p class="footer-company-address">
-          <i class="fa-solid fa-location-dot"></i> No. 45, Jalan Harmoni 3, Bukit Indah, 79100 Iskandar Puteri, Johor
-        </p>
+        <span class="footer-company-name">CleanRide Management System</span>
+        <span class="footer-company-address">No. 45, Jalan Harmoni 3, Bukit Indah, 79100 Iskandar Puteri, Johor</span>
       </div>
 
-      <div class="footer-phone-chip">
-        <i class="fa-solid fa-phone"></i>
-        <div>
-          <span class="phone-label">No. Phone / Helpline:</span>
-          <strong class="phone-number">+60 12-345 6789</strong>
-        </div>
+      <div class="footer-phone-block">
+        <span class="phone-label">PHONE / HELPLINE</span>
+        <strong class="phone-number">+60 12-345 6789</strong>
       </div>
     </div>
   </footer>
