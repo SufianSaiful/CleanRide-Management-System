@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CleanRide | Sign In / Sign Up</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/login.css">
+</head>
+<body class="auth-body">
+
+  <div class="auth-card-container">
+    
+    <div class="auth-brand-block">
+      <img src="cleanride-logo.png" alt="CleanRide Logo" class="auth-logo-img">
+      <h1 class="auth-title" id="authHeading">Sign in to CleanRide</h1>
+      <p class="auth-subtitle">Professional upholstery, carpet & vehicle care</p>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab-btn active" id="tabSignin">Sign In</button>
+      <button type="button" class="auth-tab-btn" id="tabSignup">Create Account</button>
+    </div>
+
+    <!-- Sign In Form (Clean empty inputs, no sample data pre-filled) -->
+    <form id="signinForm" class="auth-form">
+      <div class="field">
+        <label for="signinEmail">Email Address</label>
+        <input class="input" type="email" id="signinEmail" required placeholder="name@example.com" autocomplete="username">
+      </div>
+
+      <div class="field">
+        <label for="signinPassword">Password</label>
+        <input class="input" type="password" id="signinPassword" required placeholder="••••••••" autocomplete="current-password">
+      </div>
+
+      <button type="submit" class="btn btn-primary auth-submit-btn">
+        Sign in to Portal →
+      </button>
+    </form>
+
+    <!-- Create Account Form (Clean empty inputs) -->
+    <form id="signupForm" class="auth-form" style="display: none;">
+      <div class="field">
+        <label for="signupName">Full Name</label>
+        <input class="input" type="text" id="signupName" required minlength="2" placeholder="e.g. Aisha Rahman" autocomplete="name">
+      </div>
+
+      <div class="field">
+        <label for="signupPhone">Phone Number</label>
+        <input class="input" type="tel" id="signupPhone" required placeholder="e.g. 012-345 6789" autocomplete="tel">
+      </div>
+
+      <div class="field">
+        <label for="signupEmail">Email Address</label>
+        <input class="input" type="email" id="signupEmail" required placeholder="name@example.com" autocomplete="username">
+      </div>
+
+      <div class="field">
+        <label for="signupPassword">Password</label>
+        <input class="input" type="password" id="signupPassword" required minlength="6" placeholder="At least 6 characters" autocomplete="new-password">
+      </div>
+
+      <button type="submit" class="btn btn-primary auth-submit-btn">
+        Create Account & Sign In →
+      </button>
+    </form>
+
+    <!-- Quick Demo Access (Allows easy test access on click) -->
+    <div class="auth-demo-section">
+      <span class="demo-pills-label">Quick Demo Access (Optional)</span>
+      <div class="demo-pills-group">
+        <button type="button" class="btn-demo-pill" id="demoCustomerBtn">
+          Customer Demo
+        </button>
+        <button type="button" class="btn-demo-pill" id="demoOwnerBtn">
+          Owner Demo
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <!-- Scripts -->
+  <script src="js/store.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>

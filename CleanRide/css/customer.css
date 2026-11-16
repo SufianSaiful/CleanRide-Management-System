@@ -1,0 +1,294 @@
+/**
+ * CleanRide Management System - Customer Portal Stylesheet
+ * Strict Design: Dark blue #112d42, sharp rectangles, no gradients, no shadows
+ */
+
+/* Welcome Banner */
+.welcome-banner {
+  background: #ffffff;
+  border: 2px solid var(--primary);
+  padding: 1.75rem 2rem;
+  margin-bottom: 1.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.welcome-text h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin: 0 0 0.35rem;
+}
+
+.welcome-text p {
+  color: var(--muted);
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Service Tiles */
+.service-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.service-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+
+.service-symbol {
+  width: 36px;
+  height: 36px;
+  background: var(--primary);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.service-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--primary);
+}
+
+.service-meta {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.service-price {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin-left: auto;
+}
+
+/* Dashboard Two-Column Grid */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   BOOKING FORM & ESTIMATE SIDEBAR
+   ========================================================= */
+.booking-layout {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 1.75rem;
+  align-items: start;
+}
+
+@media (max-width: 992px) {
+  .booking-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-section {
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.form-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.section-label {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Capacity Strip */
+.capacity-strip {
+  background: var(--primary-subtle);
+  border: 1px solid var(--primary);
+  padding: 0.85rem 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.capacity-strip span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.capacity-meter {
+  flex: 1;
+  max-width: 200px;
+  height: 10px;
+  background: var(--line);
+  position: relative;
+  overflow: hidden;
+}
+
+.capacity-meter span {
+  display: block;
+  height: 100%;
+  background: var(--primary);
+  transition: width 0.25s ease;
+}
+
+.capacity-count {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.date-warning {
+  display: none;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--status-cancelled);
+  margin-top: 4px;
+}
+
+.date-warning.show {
+  display: block;
+}
+
+/* Summary Card */
+.summary-card {
+  background: #ffffff;
+  border: 2px solid var(--primary);
+  padding: 1.75rem;
+  position: sticky;
+  top: 90px;
+}
+
+.summary-card h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.summary-card p {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 0 0 1.25rem;
+}
+
+.summary-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding-bottom: 1.15rem;
+  margin-bottom: 1.15rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  color: var(--ink-secondary);
+}
+
+.summary-line strong {
+  color: var(--primary);
+}
+
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 0.85rem;
+}
+
+.deposit-highlight-box {
+  background: var(--primary-subtle);
+  border: 1px solid var(--primary);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.85rem;
+}
+
+.deposit-highlight-box strong {
+  color: var(--primary);
+  font-size: 1rem;
+}
+
+/* Feedback cards feed */
+.complaint-feed-card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.complaint-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.65rem;
+}
+
+.complaint-subject {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.complaint-meta {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.complaint-desc {
+  font-size: 0.88rem;
+  color: var(--ink-secondary);
+  margin: 0.5rem 0;
+  line-height: 1.45;
+}
+
+.reply-box {
+  background: var(--primary-subtle);
+  border-left: 3px solid var(--primary);
+  padding: 0.85rem 1rem;
+  margin-top: 0.75rem;
+  font-size: 0.84rem;
+}
+
+.reply-box strong {
+  color: var(--primary);
+}
