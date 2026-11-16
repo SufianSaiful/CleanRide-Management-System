@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CleanRide | Owner Operations Workspace</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="../css/common.css">
+  <link rel="stylesheet" href="../css/owner.css">
+</head>
+<body class="owner-app-body">
+
+  <!-- ================= TOP HEADER (Exit Left, Logo Center, Profile Right) ================= -->
+  <header class="app-top-header">
+    <div class="header-inner">
+      
+      <!-- 1. Left: Exit / Sign Out -->
+      <div class="header-left">
+        <button class="btn-exit" id="headerExitBtn" title="Exit to Login">
+          ← Exit
+        </button>
+      </div>
+
+      <!-- 2. Center: CleanRide Logo -->
+      <div class="header-center">
+        <a href="javascript:void(0)" onclick="CleanRideOwner.navigateTo('owner-dashboard')">
+          <img src="../cleanride-logo.png" alt="CleanRide Logo" class="header-logo-image">
+        </a>
+      </div>
+
+      <!-- 3. Right: Owner Profile -->
+      <div class="header-right">
+        <div class="header-profile-box">
+          <div class="user-avatar-small" id="headerAvatar">HQ</div>
+          <div class="header-profile-text">
+            <strong id="headerUserName">Sufian (Owner)</strong>
+            <span id="headerUserEmail">owner@cleanride.my</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <div class="app-main-layout">
+    
+    <!-- ================= COLLAPSIBLE SIDEBAR ================= -->
+    <aside class="collapsible-sidebar" id="appSidebar">
+      <div class="sidebar-top-bar">
+        <button class="sidebar-toggle-btn" id="sidebarToggleBtn" title="Toggle Sidebar">
+          ☰
+        </button>
+        <span class="sidebar-title">Operations Menu</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-caption">Operations</div>
+        <button class="nav-item active" data-page="owner-dashboard">
+          <span class="nav-icon">⌂</span>
+          <span class="nav-text">Overview</span>
+        </button>
+
+        <button class="nav-item" data-page="requests">
+          <span class="nav-icon">↘</span>
+          <span class="nav-text">Incoming Requests</span>
+          <span class="nav-badge" id="pendingNavBadge" style="display:none;">0</span>
+        </button>
+
+        <button class="nav-item" data-page="jobs">
+          <span class="nav-icon">▤</span>
+          <span class="nav-text">Job Operations</span>
+        </button>
+
+        <button class="nav-item" data-page="rentals">
+          <span class="nav-icon">◈</span>
+          <span class="nav-text">Tool Rentals</span>
+        </button>
+
+        <button class="nav-item" data-page="complaints">
+          <span class="nav-icon">◇</span>
+          <span class="nav-text">Complaint Desk</span>
+        </button>
+
+        <div class="nav-caption" style="margin-top: 10px;">Business</div>
+        <button class="nav-item" data-page="revenue">
+          <span class="nav-icon">↗</span>
+          <span class="nav-text">Revenue Report</span>
+        </button>
+
+        <button class="nav-item" data-page="settings">
+          <span class="nav-icon">⚙</span>
+          <span class="nav-text">Pricing & Capacity</span>
+        </button>
+      </nav>
+    </aside>
+
+    <!-- ================= MAIN CONTENT AREA ================= -->
+    <div class="main-content-area">
+      
+      <div class="page-content-wrapper">
+
+        <!-- VIEW 1: DASHBOARD -->
+        <section id="view-owner-dashboard" class="view-panel active">
+          
+          <div class="page-head">
+            <div>
+              <div class="eyebrow">HQ OPERATIONS WORKSPACE</div>
+              <h1>Welcome back, <span id="ownerWelcomeName">Sufian</span>.</h1>
+              <p>Daily cleaning run sheet, incoming customer bookings, and live capacity status.</p>
+            </div>
+            <div class="head-actions">
+              <button class="btn btn-secondary" onclick="CleanRideOwner.navigateTo('settings')">
+                ⚙ Capacity & Pricing
+              </button>
+              <button class="btn btn-primary" onclick="CleanRideOwner.navigateTo('requests')">
+                Review Requests
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI Metric Cards -->
+          <div class="stats-grid">
+            <article class="stat-card">
+              <div class="stat-mark">↘</div>
+              <div class="stat-label">Requests to Review</div>
+              <div class="stat-value" id="statPendingRequests">0</div>
+              <div class="stat-note">Awaiting decision</div>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-mark">▤</div>
+              <div class="stat-label">Jobs Today</div>
+              <div class="stat-value" id="statTodayJobs">0</div>
+              <div class="stat-note">Scheduled for execution</div>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-mark">RM</div>
+              <div class="stat-label">Collected This Month</div>
+              <div class="stat-value" id="statCollectedMonth">RM 0.00</div>
+              <div class="stat-note">Deposits & balances</div>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-mark">◇</div>
+              <div class="stat-label">Open Inquiries</div>
+              <div class="stat-value" id="statOpenComplaints">0</div>
+              <div class="stat-note">Customer care desk</div>
+            </article>
+          </div>
+
+          <!-- Today's Run Sheet & Quick Alerts -->
+          <div class="dashboard-grid">
+            
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title">Today's Run Sheet</div>
+                  <div class="panel-sub" id="todayRunSheetSub">Scheduled jobs</div>
+                </div>
+                <button class="text-link" onclick="CleanRideOwner.navigateTo('jobs')">Open job board →</button>
+              </div>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Customer / Ref</th>
+                      <th>Service</th>
+                      <th>Time</th>
+                      <th>Address</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="todayRunSheetBody"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title">Needs Attention</div>
+                  <div class="panel-sub">Incoming bookings & open conversations</div>
+                </div>
+              </div>
+              <div class="service-list" id="needsLookBox"></div>
+            </section>
+
+          </div>
+
+          <!-- Latest Requests Table -->
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Latest Booking Requests</div>
+                <div class="panel-sub">New customer submissions awaiting approval</div>
+              </div>
+              <button class="text-link" onclick="CleanRideOwner.navigateTo('requests')">All requests →</button>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Customer / Reference</th>
+                    <th>Service</th>
+                    <th>Date</th>
+                    <th>Address</th>
+                    <th>Estimate</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="latestRequestsTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+        </section>
+
+        <!-- VIEW 2: INCOMING REQUESTS -->
+        <section id="view-requests" class="view-panel">
+          
+          <div class="page-head">
+            <div>
+              <div class="eyebrow">INCOMING REQUESTS</div>
+              <h1>Customer Booking Requests</h1>
+              <p>Review customer booking submissions, check daily slot capacity, and confirm or decline requests.</p>
+            </div>
+            <div class="head-actions">
+              <button class="btn btn-secondary" onclick="CleanRideOwner.navigateTo('jobs')">
+                View All Jobs
+              </button>
+            </div>
+          </div>
+
+          <div class="filters">
+            <input class="input" id="reqSearchInput" placeholder="Search customer, ref, or address...">
+            <select class="select" id="reqServiceFilter">
+              <option value="">All Services</option>
+              <option value="upholstery">Upholstery cleaning</option>
+              <option value="carpet">Carpet cleaning</option>
+              <option value="vehicle">Vehicle interior</option>
+              <option value="rental">Equipment rental</option>
+            </select>
+            <input class="input" type="date" id="reqDateFilter">
+          </div>
+
+          <section class="panel">
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Customer / Contact</th>
+                    <th>Service & Items</th>
+                    <th>Date / Time</th>
+                    <th>Address</th>
+                    <th>Estimate / Deposit</th>
+                    <th>Status</th>
+                    <th>Decision</th>
+                  </tr>
+                </thead>
+                <tbody id="requestsTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+        </section>
+
+        <!-- VIEW 3: JOB OPERATIONS -->
+        <section id="view-jobs" class="view-panel">
+          
+          <div class="page-head">
+            <div>
+              <div class="eyebrow">JOB MANAGEMENT</div>
+              <h1>Job Operations Board</h1>
+              <p>Track all scheduled cleaning appointments, approve reschedule requests, and record settlements.</p>
+            </div>
+          </div>
+
+          <div class="filters">
+            <input class="input" id="jobsSearchInput" placeholder="Search customer, ref or address...">
+            <select class="select" id="jobsStatusFilter">
+              <option value="">All Statuses</option>
+              <option value="Pending">Pending</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+            <select class="select" id="jobsServiceFilter">
+              <option value="">All Services</option>
+              <option value="upholstery">Upholstery cleaning</option>
+              <option value="carpet">Carpet cleaning</option>
+              <option value="vehicle">Vehicle interior</option>
+              <option value="rental">Equipment rental</option>
+            </select>
+            <select class="select" id="jobsSortFilter">
+              <option value="date-asc">Date: Earliest First</option>
+              <option value="date-desc">Date: Latest First</option>
+              <option value="amount-desc">Highest Total</option>
+            </select>
+          </div>
+
+          <section class="panel">
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Customer / Reference</th>
+                    <th>Service</th>
+                    <th>Appointment Date</th>
+                    <th>Address</th>
+                    <th>Total / Due</th>
+                    <th>Workflow</th>
+                    <th>Payment</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="jobsTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+        </section>
+
+        <!-- VIEW 4: TOOL RENTALS -->
+        <section id="view-rentals" class="view-panel">
+          
+          <div class="page-head">
+            <div>
+              <div class="eyebrow">EQUIPMENT HIRE</div>
+              <h1>Professional Equipment Rentals</h1>
+              <p>Manage customer machine hire, approve stock on specific dates, and mark equipment returned.</p>
+            </div>
+            <div class="head-actions">
+              <button class="btn btn-secondary" onclick="CleanRideOwner.navigateTo('settings')">
+                Rental Hourly Rates
+              </button>
+            </div>
+          </div>
+
+          <div class="filters">
+            <input class="input" id="rentalSearchInput" placeholder="Search equipment or customer...">
+            <select class="select" id="rentalStatusFilter">
+              <option value="">All Statuses</option>
+              <option value="Requested">Requested</option>
+              <option value="Approved">Approved</option>
+              <option value="Returned">Returned</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+          </div>
+
+          <section class="panel">
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Reference / Customer</th>
+                    <th>Equipment Kit</th>
+                    <th>Rental Schedule</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="rentalsTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+        </section>
+
+        <!-- VIEW 5: COMPLAINT DESK -->
+        <section id="view-complaints" class="view-panel">
+          
+          <div class="page-head">
+            <div>
+              <div class="eyebrow">CUSTOMER SERVICE</div>
+              <h1>Customer Complaint & Support Desk</h1>
+              <p>Review customer feedback, provide drying advice or quality responses, and mark resolved.</p>
+            </div>
+          </div>
+
+          <div class="filters">
+            <input class="input" id="compSearchInput" placeholder="Search subject, customer or booking ID...">
+            <select class="select" id="compStatusFilter">
+              <option value="">All Statuses</option>
+              <option value="In review">In review</option>
+              <option value="Resolved">Resolved</option>
+            </select>
+            <select class="select" id="compCategoryFilter">
+              <option value="">All Categories</option>
+              <option value="Service quality">Service quality</option>
+              <option value="Appointment timing">Appointment timing</option>
+              <option value="Billing question">Billing question</option>
+              <option value="Equipment rental">Equipment rental</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div id="complaintsDeskListBox"></div>
+
+        </section>
+
+        <!-- VIEW 6: REVENUE REPORT -->
+        <section id="view-revenue" class="view-panel">
+          
+          <div class="page-head">
+            <div>
+              <div class="eyebrow">BUSINESS INTELLIGENCE</div>
+              <h1>Revenue & Financial Report</h1>
+              <p>Analyze recorded deposits, settlements, and export transactions to CSV.</p>
+            </div>
+            <div class="head-actions">
+              <button class="btn btn-secondary" id="exportRevenueCsvBtn">
+                Export CSV
+              </button>
+            </div>
+          </div>
+
+          <!-- Revenue Filters -->
+          <div class="filters">
+            <select class="select" id="revenueRangeFilter">
+              <option value="6m">Last 6 Months</option>
+              <option value="month">This Month</option>
+              <option value="all">All Time</option>
+            </select>
+            <select class="select" id="revenueStatusFilter">
+              <option value="all">All Booking Statuses</option>
+              <option value="Completed">Completed Only</option>
+              <option value="Confirmed">Confirmed Only</option>
+              <option value="Pending">Pending Only</option>
+            </select>
+            <input class="input" type="date" id="revDateFrom" placeholder="From date">
+            <input class="input" type="date" id="revDateTo" placeholder="To date">
+            <button class="btn btn-secondary btn-small" id="applyRevenueDatesBtn">
+              Apply Dates
+            </button>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="stats-grid">
+            <article class="stat-card">
+              <div class="stat-mark">RM</div>
+              <div class="stat-label">Recorded Revenue</div>
+              <div class="stat-value" id="revRecordedAmount">RM 0.00</div>
+              <div class="stat-note">Deposits & balances received</div>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-mark">✓</div>
+              <div class="stat-label">Completed Jobs</div>
+              <div class="stat-value" id="revCompletedCount">0</div>
+              <div class="stat-note">Fulfilled in period</div>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-mark">↗</div>
+              <div class="stat-label">Outstanding Balance</div>
+              <div class="stat-value" id="revOutstandingDue">RM 0.00</div>
+              <div class="stat-note">Active jobs only</div>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-mark">▤</div>
+              <div class="stat-label">Deposits / Balance Ratio</div>
+              <div class="stat-value" id="revDepositsRatio" style="font-size:1.15rem;">RM 0 / RM 0</div>
+              <div class="stat-note">Recorded deposits vs settlements</div>
+            </article>
+          </div>
+
+          <!-- Interactive SVG Chart -->
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Collected Revenue (Monthly Recorded Payments)</div>
+                <div class="panel-sub">Calculated live from local transaction records</div>
+              </div>
+            </div>
+            <div class="chart-wrap" id="revenueChartBox"></div>
+          </section>
+
+          <!-- Payment Ledger Table -->
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Payment Transaction Ledger</div>
+                <div class="panel-sub">Receipts and recorded payments</div>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Payment ID / Booking</th>
+                    <th>Transaction Date</th>
+                    <th>Payment Method</th>
+                    <th>Note</th>
+                    <th>Amount (RM)</th>
+                  </tr>
+                </thead>
+                <tbody id="revenueLedgerTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+        </section>
+
+        <!-- VIEW 7: PRICING & CAPACITY SETTINGS -->
+        <section id="view-settings" class="view-panel">
+          
+          <div class="page-head">
+            <div>
+              <div class="eyebrow">CONFIGURATION</div>
+              <h1>Pricing & Capacity Controls</h1>
+              <p>Configure daily booking capacity and set unit rates for each cleaning service.</p>
+            </div>
+            <div class="head-actions">
+              <button class="btn btn-danger" id="resetDemoDataBtn">
+                Reset Demo Data
+              </button>
+            </div>
+          </div>
+
+          <form id="serviceSettingsForm">
+            <div class="settings-grid">
+              
+              <!-- Daily Capacity -->
+              <section class="setting-card">
+                <h3>Daily Booking Capacity</h3>
+                <p>Maximum number of simultaneous active jobs permitted per calendar day.</p>
+                <div class="field">
+                  <label for="settingCapacity">Max Appointments / Day</label>
+                  <input class="input" type="number" id="settingCapacity" min="1" max="40" required>
+                </div>
+              </section>
+
+              <!-- Upholstery Pricing -->
+              <section class="setting-card">
+                <h3>Upholstery Cleaning (RM / Item)</h3>
+                <p>Base rate per furniture item before soil level adjustment.</p>
+                <div class="form-grid">
+                  <div class="field">
+                    <label>3-Seater Sofa</label>
+                    <input class="input" type="number" id="up_sofa" min="1" step="0.5" required>
+                  </div>
+                  <div class="field">
+                    <label>Mattress</label>
+                    <input class="input" type="number" id="up_mattress" min="1" step="0.5" required>
+                  </div>
+                  <div class="field">
+                    <label>Dining Chair</label>
+                    <input class="input" type="number" id="up_dining" min="1" step="0.5" required>
+                  </div>
+                  <div class="field">
+                    <label>Curtain Set</label>
+                    <input class="input" type="number" id="up_curtains" min="1" step="0.5" required>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Carpet Pricing -->
+              <section class="setting-card">
+                <h3>Carpet Cleaning (RM / m²)</h3>
+                <p>Square meter rate and fixed soil difficulty surcharges.</p>
+                <div class="form-grid">
+                  <div class="field">
+                    <label>Rate per m²</label>
+                    <input class="input" type="number" id="carpet_rate" min="1" step="0.5" required>
+                  </div>
+                  <div class="field">
+                    <label>Light Soil Surcharge</label>
+                    <input class="input" type="number" id="dirt_Light" min="0" required>
+                  </div>
+                  <div class="field">
+                    <label>Moderate Soil Surcharge</label>
+                    <input class="input" type="number" id="dirt_Moderate" min="0" required>
+                  </div>
+                  <div class="field">
+                    <label>Heavy Soil Surcharge</label>
+                    <input class="input" type="number" id="dirt_Heavy" min="0" required>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Vehicle Detailing -->
+              <section class="setting-card">
+                <h3>Vehicle Detailing (RM / Vehicle)</h3>
+                <p>Base price per vehicle type and surcharge for extra seats above 5.</p>
+                <div class="form-grid">
+                  <div class="field">
+                    <label>Sedan / Hatchback</label>
+                    <input class="input" type="number" id="veh_car" min="1" required>
+                  </div>
+                  <div class="field">
+                    <label>SUV</label>
+                    <input class="input" type="number" id="veh_suv" min="1" required>
+                  </div>
+                  <div class="field">
+                    <label>MPV</label>
+                    <input class="input" type="number" id="veh_mpv" min="1" required>
+                  </div>
+                  <div class="field">
+                    <label>Van</label>
+                    <input class="input" type="number" id="veh_van" min="1" required>
+                  </div>
+                  <div class="field">
+                    <label>Additional Seat Rate</label>
+                    <input class="input" type="number" id="veh_seat" min="1" required>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Equipment Rental -->
+              <section class="setting-card">
+                <h3>Equipment Rental (RM / Hour)</h3>
+                <p>Hourly hire rate for each specialized cleaning machine.</p>
+                <div class="form-grid">
+                  <div class="field">
+                    <label>Extractor</label>
+                    <input class="input" type="number" id="rent_extractor" min="1" required>
+                  </div>
+                  <div class="field">
+                    <label>Steam Cleaner</label>
+                    <input class="input" type="number" id="rent_steam" min="1" required>
+                  </div>
+                  <div class="field">
+                    <label>Air Mover Dryer</label>
+                    <input class="input" type="number" id="rent_dryer" min="1" required>
+                  </div>
+                </div>
+              </section>
+
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+              <button type="submit" class="btn btn-primary" style="padding: 0.85rem 1.75rem;">
+                Save Service Settings →
+              </button>
+            </div>
+          </form>
+
+        </section>
+
+      </div>
+
+      <!-- ================= BOTTOM FOOTER ================= -->
+      <footer class="app-bottom-footer">
+        <div class="footer-layout">
+          <div class="footer-company-info">
+            <span class="footer-company-name">CleanRide Management System Sdn. Bhd.</span>
+            <span class="footer-company-address">No. 45, Jalan Harmoni 3, Bukit Indah, 79100 Iskandar Puteri, Johor</span>
+          </div>
+          <div class="footer-phone-block">
+            <span class="phone-label">Operations Helpline</span>
+            <span class="phone-number">+60 12-345 6789</span>
+          </div>
+        </div>
+      </footer>
+
+    </div>
+
+  </div>
+
+  <!-- Reusable Modal Backdrop -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title" id="modalTitle">Modal Title</div>
+          <div class="modal-sub" id="modalSubtitle">Modal Subtitle</div>
+        </div>
+        <button class="icon-btn" id="modalCloseBtn" aria-label="Close">×</button>
+      </div>
+      <div id="modalBody"></div>
+      <div class="modal-actions" id="modalActions"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Scripts -->
+  <script src="../js/store.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/owner.js"></script>
+</body>
+</html>

@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CleanRide | Customer Portal</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="../css/common.css">
+  <link rel="stylesheet" href="../css/customer.css">
+</head>
+<body class="customer-app-body">
+
+  <!-- ================= TOP HEADER (Exit Left, Logo Center, Profile Right) ================= -->
+  <header class="app-top-header">
+    <div class="header-inner">
+      
+      <!-- 1. Left: Exit / Sign Out -->
+      <div class="header-left">
+        <button class="btn-exit" id="headerExitBtn" title="Exit to Login">
+          ← Exit
+        </button>
+      </div>
+
+      <!-- 2. Center: CleanRide Logo -->
+      <div class="header-center">
+        <a href="javascript:void(0)" onclick="CleanRideCustomer.navigateTo('customer-home')">
+          <img src="../cleanride-logo.png" alt="CleanRide Logo" class="header-logo-image">
+        </a>
+      </div>
+
+      <!-- 3. Right: Customer Profile -->
+      <div class="header-right">
+        <div class="header-profile-box">
+          <div class="user-avatar-small" id="headerAvatar">CU</div>
+          <div class="header-profile-text">
+            <strong id="headerUserName">Customer Profile</strong>
+            <span id="headerUserEmail">customer@cleanride.com</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <div class="app-main-layout">
+    
+    <!-- ================= COLLAPSIBLE SIDEBAR ================= -->
+    <aside class="collapsible-sidebar" id="appSidebar">
+      <div class="sidebar-top-bar">
+        <button class="sidebar-toggle-btn" id="sidebarToggleBtn" title="Toggle Sidebar">
+          ☰
+        </button>
+        <span class="sidebar-title">Customer Menu</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-caption">Your Service</div>
+        <button class="nav-item active" data-page="customer-home">
+          <span class="nav-icon">⌂</span>
+          <span class="nav-text">Overview</span>
+        </button>
+
+        <button class="nav-item" data-page="new-booking">
+          <span class="nav-icon">＋</span>
+          <span class="nav-text">Request Service</span>
+        </button>
+
+        <button class="nav-item" data-page="appointments">
+          <span class="nav-icon">▤</span>
+          <span class="nav-text">Customer List</span>
+          <span class="nav-badge" id="custApptNavBadge" style="display:none;">0</span>
+        </button>
+
+        <button class="nav-item" data-page="reports">
+          <span class="nav-icon">◇</span>
+          <span class="nav-text">Feedback & Reports</span>
+        </button>
+      </nav>
+    </aside>
+
+    <!-- ================= MAIN CONTENT AREA ================= -->
+    <div class="main-content-area">
+      
+      <div class="page-content-wrapper">
+
+        <!-- VIEW 1: OVERVIEW -->
+        <section id="view-customer-home" class="view-panel active">
+          
+          <div class="welcome-banner">
+            <div class="welcome-text">
+              <h2>Welcome, <span id="welcomeCustName">Customer</span>.</h2>
+              <p>Book cleaning services, manage appointments, and track your cleaning jobs.</p>
+            </div>
+            <div>
+              <button class="btn btn-primary" onclick="CleanRideCustomer.navigateTo('new-booking')">
+                ＋ Request Service Now
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI Metric Cards -->
+          <div class="stats-grid">
+            <article class="stat-card">
+              <div class="stat-mark">▤</div>
+              <div class="stat-label">Upcoming Appointments</div>
+              <div class="stat-value" id="statUpcomingCount">0</div>
+              <div class="stat-note">Scheduled visits</div>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-mark">✓</div>
+              <div class="stat-label">Completed Visits</div>
+              <div class="stat-value" id="statCompletedCount">0</div>
+              <div class="stat-note">Services fulfilled</div>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-mark">RM</div>
+              <div class="stat-label">Open Balance</div>
+              <div class="stat-value" id="statOpenBalance">RM 0.00</div>
+              <div class="stat-note">Across active visits</div>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-mark">◇</div>
+              <div class="stat-label">Feedback Sent</div>
+              <div class="stat-value" id="statFeedbackCount">0</div>
+              <div class="stat-note">Submitted notes</div>
+            </article>
+          </div>
+
+          <!-- Coming Up & Services Grid -->
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title">Coming Up Next</div>
+                  <div class="panel-sub">Your next scheduled visit</div>
+                </div>
+                <button class="text-link" onclick="CleanRideCustomer.navigateTo('appointments')">Customer list →</button>
+              </div>
+              <div id="nextVisitBox"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title">Our Cleaning Services</div>
+                  <div class="panel-sub">Available residential & commercial care</div>
+                </div>
+              </div>
+              <div class="service-list" id="servicesListTiles"></div>
+            </section>
+          </div>
+
+          <!-- Recent Bookings Table -->
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Recent Activity</div>
+                <div class="panel-sub">Your latest service bookings</div>
+              </div>
+              <button class="text-link" onclick="CleanRideCustomer.navigateTo('appointments')">Full customer list →</button>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Reference / Service</th>
+                    <th>Details</th>
+                    <th>Appointment Date</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="recentBookingsTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+        </section>
+
+        <!-- VIEW 2: REQUEST SERVICE (BOOKING) -->
+        <section id="view-new-booking" class="view-panel">
+          
+          <div class="page-head">
+            <div>
+              <div class="eyebrow">NEW APPOINTMENT</div>
+              <h1>Request a Cleaning Service</h1>
+              <p>Select your cleaning type, customize dimensions or vehicle counts, and reserve an arrival window.</p>
+            </div>
+          </div>
+
+          <form id="customerBookingForm">
+            <div class="booking-layout">
+              
+              <!-- Form Column -->
+              <div class="panel">
+                
+                <!-- 1. Service Selection -->
+                <div class="form-section">
+                  <div class="section-label">1. Choose Service Category</div>
+                  <div class="field">
+                    <label for="bookingServiceSelect">Service Category</label>
+                    <select class="select" id="bookingServiceSelect" name="service" required>
+                      <option value="">-- Select a Cleaning Service --</option>
+                      <option value="upholstery">Upholstery Cleaning (Sofas, Mattresses, Curtains)</option>
+                      <option value="carpet">Carpet Deep Cleaning</option>
+                      <option value="vehicle">Vehicle Interior Detailing</option>
+                      <option value="rental">Professional Equipment Rental</option>
+                    </select>
+                  </div>
+                  <div id="dynamicServiceFields" style="margin-top: 1rem;">
+                    <div class="notice">Select a service category above to specify quantity and requirements.</div>
+                  </div>
+                </div>
+
+                <!-- 2. Address & Contact (Clean empty inputs, no sample data pre-filled) -->
+                <div class="form-section">
+                  <div class="section-label">2. Service Address & Contact</div>
+                  <div class="form-grid">
+                    <div class="field">
+                      <label>Contact Full Name</label>
+                      <input class="input" type="text" id="custNameInput" name="name" required minlength="2" placeholder="e.g. Aisha Rahman">
+                    </div>
+                    <div class="field">
+                      <label>Email Address</label>
+                      <input class="input" type="email" id="custEmailInput" name="email" required placeholder="name@example.com">
+                    </div>
+                    <div class="field">
+                      <label>Phone Number</label>
+                      <input class="input" type="tel" id="custPhoneInput" name="phone" required placeholder="e.g. 012-345 6789">
+                    </div>
+                    <div class="field">
+                      <label>Service Street Address</label>
+                      <input class="input" type="text" id="custAddressInput" name="address" required minlength="6" placeholder="Street, house number, area, city">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 3. Date, Time & Capacity Check -->
+                <div class="form-section">
+                  <div class="section-label">3. Date & Capacity Check</div>
+                  
+                  <div class="capacity-strip">
+                    <span id="capacityLabel">Select a date to check availability</span>
+                    <div class="capacity-meter">
+                      <span id="capacityMeterBar" style="width: 0%;"></span>
+                    </div>
+                    <strong class="capacity-count" id="capacityCount">—</strong>
+                  </div>
+
+                  <div class="form-grid">
+                    <div class="field">
+                      <label for="bookingDate">Preferred Service Date</label>
+                      <input class="input" type="date" id="bookingDate" name="date" required>
+                      <div class="date-warning" id="dateCapacityWarning"></div>
+                    </div>
+                    <div class="field">
+                      <label for="bookingTime">Arrival Window</label>
+                      <select class="select" id="bookingTime" name="time" required>
+                        <option value="">-- Choose Arrival Window --</option>
+                        <option value="09:00">09:00 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="13:00">01:00 PM</option>
+                        <option value="15:00">03:00 PM</option>
+                      </select>
+                    </div>
+                    <div class="field full">
+                      <label>Special Instructions / Access Notes (Optional)</label>
+                      <textarea class="textarea" name="instructions" placeholder="Access notes, parking instructions, fabric concerns..."></textarea>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="margin-top: 1.5rem;">
+                  <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.95rem; font-size: 1rem;">
+                    Review Booking & Deposit →
+                  </button>
+                </div>
+
+              </div>
+
+              <!-- Live Estimate Sidebar -->
+              <aside class="summary-card">
+                <h3>Live Price Estimate</h3>
+                <p>Calculated dynamically based on service configuration</p>
+                <div class="summary-breakdown" id="liveQuoteBreakdown">
+                  <div class="summary-line"><span>Service estimate</span><strong>Choose service</strong></div>
+                  <div class="summary-line"><span>Extras & adjustments</span><strong>—</strong></div>
+                  <div class="summary-line"><span>Estimated balance</span><strong>—</strong></div>
+                </div>
+                <div class="summary-total">
+                  <span>Total (RM)</span>
+                  <span id="liveQuoteTotal">RM 0.00</span>
+                </div>
+                <div class="deposit-highlight-box">
+                  <span>20% Deposit Due Today:</span><br>
+                  <strong id="liveQuoteDeposit">RM 0.00</strong>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                  Continue to Deposit Review
+                </button>
+              </aside>
+
+            </div>
+          </form>
+
+        </section>
+
+        <!-- VIEW 3: CUSTOMER LIST (APPOINTMENTS) -->
+        <section id="view-appointments" class="view-panel">
+          
+          <div class="page-head">
+            <div>
+              <div class="eyebrow">CUSTOMER LIST / APPOINTMENTS</div>
+              <h1 id="apptListTitle">Your Customer List</h1>
+              <p>Track your scheduled cleaning jobs, view status updates, and manage appointments.</p>
+            </div>
+            <div class="head-actions">
+              <button class="btn btn-primary" onclick="CleanRideCustomer.navigateTo('new-booking')">
+                ＋ Request Service
+              </button>
+            </div>
+          </div>
+
+          <!-- Search & Filter Bar -->
+          <div class="filters">
+            <input class="input" id="apptSearchInput" placeholder="Search reference or service...">
+            <select class="select" id="apptStatusFilter">
+              <option value="">All Statuses</option>
+              <option value="Pending">Pending</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+            <select class="select" id="apptSortFilter">
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+            </select>
+          </div>
+
+          <!-- Appointments Table -->
+          <section class="panel">
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Reference / Service</th>
+                    <th>Service Details</th>
+                    <th>Appointment Date</th>
+                    <th>Estimate Total</th>
+                    <th>Booking Status</th>
+                    <th>Payment Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="appointmentsTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+        </section>
+
+        <!-- VIEW 4: FEEDBACK & REPORTS -->
+        <section id="view-reports" class="view-panel">
+          
+          <div class="page-head">
+            <div>
+              <div class="eyebrow">CUSTOMER CARE</div>
+              <h1>Feedback & Support Reports</h1>
+              <p>Submit inquiries or feedback regarding a visit and review replies from operations.</p>
+            </div>
+          </div>
+
+          <div class="dashboard-grid">
+            
+            <!-- Submit Form -->
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title">Submit Feedback / Inquiry</div>
+                  <div class="panel-sub">Your note goes directly to our operations manager</div>
+                </div>
+              </div>
+
+              <form id="customerFeedbackForm" class="form-grid">
+                <div class="field full">
+                  <label for="feedbackBookingSelect">Booking Reference</label>
+                  <select class="select" id="feedbackBookingSelect" required>
+                    <option value="">-- Choose an Appointment --</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="feedbackCategory">Category</label>
+                  <select class="select" id="feedbackCategory">
+                    <option>Service quality</option>
+                    <option>Appointment timing</option>
+                    <option>Billing question</option>
+                    <option>Equipment rental</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="feedbackDate">Date of Experience</label>
+                  <input class="input" type="date" id="feedbackDate" required>
+                </div>
+
+                <div class="field full">
+                  <label for="feedbackSubject">Subject</label>
+                  <input class="input" type="text" id="feedbackSubject" required minlength="4" placeholder="Brief summary of your note">
+                </div>
+
+                <div class="field full">
+                  <label for="feedbackDesc">Details</label>
+                  <textarea class="textarea" id="feedbackDesc" required minlength="8" placeholder="Please describe what happened or what assistance you need..."></textarea>
+                </div>
+
+                <div class="full" style="margin-top: 0.5rem;">
+                  <button type="submit" class="btn btn-primary">
+                    Send Feedback / Report →
+                  </button>
+                </div>
+              </form>
+            </section>
+
+            <!-- Conversations Feed -->
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title">Your Conversations & Replies</div>
+                  <div class="panel-sub">All responses logged in one place</div>
+                </div>
+              </div>
+              <div id="feedbackFeedBox"></div>
+            </section>
+
+          </div>
+
+        </section>
+
+      </div>
+
+      <!-- ================= BOTTOM FOOTER ================= -->
+      <footer class="app-bottom-footer">
+        <div class="footer-layout">
+          <div class="footer-company-info">
+            <span class="footer-company-name">CleanRide Management System Sdn. Bhd.</span>
+            <span class="footer-company-address">No. 45, Jalan Harmoni 3, Bukit Indah, 79100 Iskandar Puteri, Johor</span>
+          </div>
+          <div class="footer-phone-block">
+            <span class="phone-label">Customer Helpline / Support</span>
+            <span class="phone-number">+60 12-345 6789</span>
+          </div>
+        </div>
+      </footer>
+
+    </div>
+
+  </div>
+
+  <!-- Reusable Modal Backdrop -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title" id="modalTitle">Modal Title</div>
+          <div class="modal-sub" id="modalSubtitle">Modal Subtitle</div>
+        </div>
+        <button class="icon-btn" id="modalCloseBtn" aria-label="Close">×</button>
+      </div>
+      <div id="modalBody"></div>
+      <div class="modal-actions" id="modalActions"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Scripts -->
+  <script src="../js/store.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/customer.js"></script>
+</body>
+</html>
