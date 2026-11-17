@@ -1,0 +1,112 @@
+@import url("../shared/common.css");
+
+/* ==========================================================================
+   CleanRide Customer Portal Styles
+   ========================================================================== */
+
+/* BOOKING SUMMARY STICKY CARD */
+
+.summary-card {
+    position: sticky;
+    top: 96px;
+    background: #143c54;
+    color: white;
+    border-radius: 16px;
+    padding: 21px;
+    box-shadow: var(--shadow);
+}
+
+.summary-card h3 {
+    font: 700 15px Manrope, sans-serif;
+    margin: 0 0 5px;
+}
+
+.summary-card > p {
+    color: #a9c5d0;
+    font-size: 11px;
+    margin: 0 0 18px;
+}
+
+.summary-line {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, .12);
+    font-size: 11px;
+    color: #c3d7df;
+}
+
+.summary-line strong {
+    color: white;
+}
+
+.summary-total {
+    font: 800 22px Manrope, sans-serif;
+    margin-top: 14px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.summary-card .btn {
+    width: 100%;
+    margin-top: 18px;
+    background: #6ac4c6;
+    color: #133c51;
+}
+
+.summary-breakdown {
+    margin-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, .15);
+    padding-top: 8px;
+}
+
+/* CAPACITY CHECK STRIP */
+
+.capacity-strip {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #f4f8f8;
+    font-size: 11px;
+    color: #58707d;
+    margin: 12px 0;
+}
+
+.capacity-meter {
+    height: 6px;
+    background: #d8e6e9;
+    border-radius: 8px;
+    flex: 1;
+    overflow: hidden;
+}
+
+.capacity-meter span {
+    display: block;
+    height: 100%;
+    background: #43a8a6;
+    border-radius: 8px;
+    transition: width .3s ease;
+}
+
+.date-warning {
+    font-size: 10px;
+    color: #a55448;
+    display: none;
+    margin-top: 4px;
+}
+
+.date-warning.show {
+    display: block;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 720px) {
+    .summary-card {
+        position: static;
+        grid-row: 1;
+    }
+}

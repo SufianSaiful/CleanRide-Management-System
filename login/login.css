@@ -1,0 +1,185 @@
+@import url("../shared/common.css");
+
+/* ==========================================================================
+   CleanRide Login & Registration Styles
+   ========================================================================== */
+
+.login-screen {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: #f3f7f7;
+}
+
+.login-art {
+    background: #143c54;
+    color: white;
+    padding: 52px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-art:after {
+    content: "";
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    border: 1px solid rgba(147, 213, 214, .2);
+    border-radius: 50%;
+    right: -100px;
+    bottom: -150px;
+    box-shadow:
+        0 0 0 45px rgba(147, 213, 214, .05),
+        0 0 0 90px rgba(147, 213, 214, .04);
+}
+
+.login-copy {
+    max-width: 480px;
+    position: relative;
+    z-index: 1;
+    margin: auto 0;
+}
+
+.login-copy h1 {
+    font: 800 clamp(36px, 5vw, 60px) Manrope, sans-serif;
+    letter-spacing: -2px;
+    line-height: 1.04;
+    margin: 0 0 16px;
+}
+
+.login-copy p {
+    line-height: 1.7;
+    color: #bad1d9;
+    max-width: 400px;
+}
+
+.login-points {
+    display: flex;
+    gap: 22px;
+    position: relative;
+    z-index: 1;
+    color: #b8d0d9;
+    font-size: 11px;
+}
+
+.login-panel {
+    display: grid;
+    place-items: center;
+    padding: 32px;
+}
+
+.login-box {
+    width: min(400px, 100%);
+}
+
+.login-box h2 {
+    font: 800 28px Manrope, sans-serif;
+    margin: 0 0 7px;
+    letter-spacing: -.8px;
+}
+
+.login-box > p {
+    color: var(--muted);
+    font-size: 12px;
+    margin: 0 0 23px;
+}
+
+/* LOGIN TABS */
+
+.login-tabs {
+    display: flex;
+    background: #e7eff1;
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 20px;
+}
+
+.login-tabs button {
+    flex: 1;
+    border: 0;
+    background: transparent;
+    padding: 9px;
+    border-radius: 7px;
+    color: #6c818e;
+    font-size: 11px;
+    font-weight: 700;
+    transition: background .15s, color .15s;
+}
+
+.login-tabs button.active {
+    background: white;
+    color: #245e73;
+    box-shadow: 0 2px 7px rgba(25, 63, 80, .07);
+}
+
+.demo-credentials {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px;
+    margin-top: 17px;
+    font-size: 11px;
+    color: #647c89;
+    line-height: 1.6;
+    background: #fafcfd;
+}
+
+.demo-credentials strong {
+    color: #35596b;
+}
+
+.demo-chip-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.demo-chip {
+    flex: 1;
+    border: 1px dashed #9bc3ce;
+    background: #eff6f8;
+    color: #1a566f;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+    transition: background .15s, border-color .15s;
+}
+
+.demo-chip:hover {
+    background: #dbecef;
+    border-color: #559db0;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 720px) {
+    .login-screen {
+        grid-template-columns: 1fr;
+    }
+
+    .login-art {
+        min-height: 220px;
+        padding: 24px;
+    }
+
+    .login-copy {
+        margin: 16px 0;
+    }
+
+    .login-copy h1 {
+        font-size: 32px;
+    }
+
+    .login-points {
+        display: none;
+    }
+
+    .login-panel {
+        padding: 27px 20px 38px;
+    }
+}

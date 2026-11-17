@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#143c54">
+  <meta name="description" content="CleanRide service booking and operations — Sign In">
+  <title>CleanRide — Sign in</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="../shared/common.css">
+  <link rel="stylesheet" href="./login.css">
+</head>
+<body>
+  <div class="login-screen">
+    <!-- Left Hero Art -->
+    <section class="login-art">
+      <div class="brand">
+        <div class="brand-mark">CR</div>
+        <div class="brand-name">CleanRide<small>Home care services</small></div>
+      </div>
+      <div class="login-copy">
+        <div class="eyebrow" style="color:#8fd5d3">HOME CLEANING &amp; RENTALS</div>
+        <h1>A cleaner home,<br>made simple.</h1>
+        <p>Book cleaning services or rent equipment with ease.</p>
+      </div>
+      <div class="login-points">
+        <span>01&nbsp; Easy booking</span>
+        <span>02&nbsp; Local team</span>
+        <span>03&nbsp; Clear pricing</span>
+      </div>
+    </section>
+
+    <!-- Right Login Panel -->
+    <section class="login-panel">
+      <div class="login-box">
+        <h2 id="auth-heading">Sign in to CleanRide</h2>
+        <p id="auth-subheading">Manage bookings and services.</p>
+
+        <!-- Tabs -->
+        <div class="login-tabs" role="tablist">
+          <button type="button" class="active" data-auth-tab="signin" id="tab-signin">Sign in</button>
+          <button type="button" data-auth-tab="signup" id="tab-signup">Create account</button>
+        </div>
+
+        <!-- Auth Form -->
+        <form id="auth-form" novalidate>
+          <div id="auth-fields" class="form-grid">
+            <!-- Dynamically populated by login.js based on tab -->
+          </div>
+          <button class="btn btn-primary" style="width:100%;margin-top:17px" type="submit" id="auth-submit">Sign in</button>
+        </form>
+
+        <!-- Demo Credentials Helper -->
+        <div class="notice" style="margin-top:16px">
+          <div class="demo-credentials">
+            <strong>Customer demo:</strong> aisha@example.com · cleanride123<br>
+            <strong>Owner demo:</strong> owner@cleanride.my · owner123
+            <div class="demo-chip-group">
+              <button type="button" class="demo-chip" id="fill-customer">Fill Customer</button>
+              <button type="button" class="demo-chip" id="fill-owner">Fill Owner</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="../shared/common.js"></script>
+  <script src="./login.js" defer></script>
+</body>
+</html>

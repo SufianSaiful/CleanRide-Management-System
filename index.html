@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#143c54">
+  <meta name="description" content="CleanRide service booking and operations">
+  <title>CleanRide — Service operations</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="stylesheet" href="./shared/common.css">
+  <script>
+    // Intelligent root routing based on existing session
+    (() => {
+      try {
+        const saved = JSON.parse(localStorage.getItem("cleanride-demo-v1"));
+        if (saved && saved.session) {
+          const user = (saved.users || []).find(u => u.id === saved.session.id);
+          if (user && user.role === "owner") {
+            window.location.replace("./owner/owner.html");
+            return;
+          } else if (user && user.role === "customer") {
+            window.location.replace("./customer/customer.html");
+            return;
+          }
+        }
+      } catch (e) {}
+      window.location.replace("./login/login.html");
+    })();
+  </script>
+</head>
+<body style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f4f8f9;text-align:center;padding:20px">
+  <div class="panel" style="max-width:440px;width:100%">
+    <div class="brand" style="justify-content:center;padding-bottom:15px">
+      <div class="brand-mark">CR</div>
+      <div class="brand-name">CleanRide<small>Home care services</small></div>
+    </div>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:20px">Redirecting to your workspace...</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <a href="./login/login.html" class="btn btn-primary">Go to Sign in</a>
+      <a href="./customer/customer.html" class="btn btn-secondary">Customer Portal</a>
+      <a href="./owner/owner.html" class="btn btn-secondary">Owner Workspace</a>
+    </div>
+  </div>
+</body>
+</html>
