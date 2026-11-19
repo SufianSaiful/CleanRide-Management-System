@@ -1,0 +1,133 @@
+﻿<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#143c54">
+  <meta name="description" content="CleanRide Owner Workspace — Operations, Jobs, Rentals, Complaints, Revenue and Settings">
+  <title>CleanRide — Owner Workspace</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="../shared/common.css">
+  <link rel="stylesheet" href="./owner.css">
+</head>
+<body>
+  <div class="app-shell" id="app-shell">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">CR</div>
+        <div class="brand-name">CleanRide<small>Home care services</small></div>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-caption">Operations</div>
+        <a href="#owner-dashboard" class="nav-item active" data-page="owner-dashboard">
+          <span class="nav-icon" aria-hidden="true">⌂</span>
+          <span class="nav-label">Overview</span>
+        </a>
+        <a href="#requests" class="nav-item" data-page="requests">
+          <span class="nav-icon" aria-hidden="true">↘</span>
+          <span class="nav-label">Incoming requests</span>
+          <span class="nav-count" id="pending-requests-count" style="display:none">0</span>
+        </a>
+        <a href="#jobs" class="nav-item" data-page="jobs">
+          <span class="nav-icon" aria-hidden="true">▤</span>
+          <span class="nav-label">Job operations</span>
+        </a>
+        <a href="#equipment" class="nav-item" data-page="equipment">
+          <span class="nav-icon" aria-hidden="true">🛠</span>
+          <span class="nav-label">Equipment tracking</span>
+        </a>
+        <a href="#rentals" class="nav-item" data-page="rentals">
+          <span class="nav-icon" aria-hidden="true">◈</span>
+          <span class="nav-label">Tool rentals</span>
+        </a>
+        <a href="#complaints" class="nav-item" data-page="complaints">
+          <span class="nav-icon" aria-hidden="true">◇</span>
+          <span class="nav-label">Complaint desk</span>
+        </a>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-caption">Business</div>
+        <a href="#revenue" class="nav-item" data-page="revenue">
+          <span class="nav-icon" aria-hidden="true">↗</span>
+          <span class="nav-label">Revenue report</span>
+        </a>
+        <a href="#settings" class="nav-item" data-page="settings">
+          <span class="nav-icon" aria-hidden="true">S</span>
+          <span class="nav-label">Pricing &amp; capacity</span>
+        </a>
+      </div>
+
+      <div class="sidebar-bottom">
+        <button type="button" class="collapse-btn" data-action="collapse">
+          <span class="nav-icon" aria-hidden="true">‹</span>
+          <span class="collapse-label">Collapse menu</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Mobile Drawer Backdrop -->
+    <div class="side-backdrop" data-action="close-mobile"></div>
+
+    <!-- Main Workspace Area -->
+    <div class="main-area">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="top-left">
+          <button type="button" class="mobile-menu" data-action="mobile-menu" aria-label="Open navigation">☰</button>
+          <div>
+            <div class="breadcrumb" id="top-breadcrumb">CleanRide / Operations overview</div>
+            <div class="top-title" id="top-title">Operations overview</div>
+          </div>
+        </div>
+        <div class="top-right">
+          <span class="role-chip">Owner workspace</span>
+          <div class="user-pill">
+            <span class="avatar" id="user-avatar">O</span>
+            <span id="user-display-name">Owner</span>
+          </div>
+          <button type="button" class="btn btn-quiet btn-small" data-action="logout">Sign out</button>
+        </div>
+      </header>
+
+      <!-- Dynamic Owner Content Container -->
+      <main class="content" id="owner-view-container"></main>
+
+      <!-- Company Footer -->
+      <footer class="footer">
+        <div class="footer-company">
+          <strong>CleanRide Management System</strong>
+          <span>No. 45, Jalan Harmoni 3, Bukit Indah, 79100 Iskandar Puteri, Johor</span>
+        </div>
+        <div class="footer-contact">
+          <span>PHONE / HELPLINE</span>
+          <strong>+60 12-345 6789</strong>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="mobile-nav" id="mobile-nav">
+    <button type="button" data-page="owner-dashboard"><span>⌂</span><span>Home</span></button>
+    <button type="button" data-page="requests"><span>↘</span><span>Requests</span></button>
+    <button type="button" data-page="jobs"><span>▤</span><span>Jobs</span></button>
+    <button type="button" data-page="equipment"><span>🛠</span><span>Kit</span></button>
+    <button type="button" data-page="revenue"><span>↗</span><span>Revenue</span></button>
+  </nav>
+
+  <!-- Modal Dialog Container -->
+  <div class="modal-backdrop" id="modal">
+    <section class="modal" role="dialog" aria-modal="true"></section>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Scripts -->
+  <script src="../shared/common.js"></script>
+  <script src="./owner.js" defer=""></script>
+
+
+</body></html>

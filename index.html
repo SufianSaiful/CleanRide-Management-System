@@ -4,42 +4,161 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#143c54">
-  <meta name="description" content="CleanRide service booking and operations">
-  <title>CleanRide — Service operations</title>
+  <meta name="description" content="CleanRide - Home Care & Equipment Services Management">
+  <title>CleanRide — Service & Account Operations</title>
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
-  <link rel="stylesheet" href="./shared/common.css">
-  <script>
-    // Intelligent root routing based on existing session
-    (() => {
-      try {
-        const saved = JSON.parse(localStorage.getItem("cleanride-demo-v1"));
-        if (saved && saved.session) {
-          const user = (saved.users || []).find(u => u.id === saved.session.id);
-          if (user && user.role === "owner") {
-            window.location.replace("./owner/owner.html");
-            return;
-          } else if (user && user.role === "customer") {
-            window.location.replace("./customer/customer.html");
-            return;
-          }
-        }
-      } catch (e) {}
-      window.location.replace("./login/login.html");
-    })();
-  </script>
+  <link rel="stylesheet" href="./style.css">
 </head>
-<body style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f4f8f9;text-align:center;padding:20px">
-  <div class="panel" style="max-width:440px;width:100%">
-    <div class="brand" style="justify-content:center;padding-bottom:15px">
-      <div class="brand-mark">CR</div>
-      <div class="brand-name">CleanRide<small>Home care services</small></div>
-    </div>
-    <p style="color:var(--muted);font-size:13px;margin-bottom:20px">Redirecting to your workspace...</p>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <a href="./login/login.html" class="btn btn-primary">Go to Sign in</a>
-      <a href="./customer/customer.html" class="btn btn-secondary">Customer Portal</a>
-      <a href="./owner/owner.html" class="btn btn-secondary">Owner Workspace</a>
-    </div>
+<body>
+  <div class="app-container">
+    <!-- Main Top Header -->
+    <header class="app-header">
+      <a href="./index.html" class="brand">
+        <div class="brand-mark">CR</div>
+        <div class="brand-name">
+          CleanRide
+          <small>Home Care &amp; Operations</small>
+        </div>
+      </a>
+      <div class="header-links">
+        <div id="user-badge-container" style="display: none;">
+          <span class="user-badge" id="current-user-badge">Logged in</span>
+          <button type="button" class="btn btn-quiet btn-small" id="header-logout-btn" style="color:#ffffff; border-color:rgba(255,255,255,0.3);">Sign out</button>
+        </div>
+        <a href="./customer/customer.html" class="btn btn-secondary btn-small">Customer Portal</a>
+        <a href="./owner/owner.html" class="btn btn-quiet btn-small" style="color:#ffffff; border-color:rgba(255,255,255,0.3);">Owner Workspace</a>
+      </div>
+    </header>
+
+    <!-- Dedicated Non-Shifting Status / Alert Container -->
+    <div id="status-container" class="status-container" role="alert" aria-live="polite"></div>
+
+    <!-- Main Dashboard Two-Column Layout -->
+    <main class="dashboard-grid">
+      <!-- Left Column: Authentication & Registration -->
+      <section class="panel" id="auth-panel">
+        <div class="panel-head">
+          <div>
+            <h1 class="panel-title" id="auth-title">Account Access</h1>
+            <p class="panel-sub" id="auth-subtitle">Sign in or register your CleanRide account.</p>
+          </div>
+        </div>
+
+        <!-- Auth Mode Toggle Tabs -->
+        <div class="login-tabs" role="tablist" id="auth-tabs">
+          <button type="button" class="active" id="tab-signin" role="tab">Sign in</button>
+          <button type="button" id="tab-signup" role="tab">Create account</button>
+        </div>
+
+        <!-- 1. Sign In Form -->
+        <form id="login-form" class="form-grid" novalidate>
+          <div class="field">
+            <label for="login-username">Username or Email</label>
+            <input class="input" id="login-username" name="username" type="text" required autocomplete="username" placeholder="Enter your username or email">
+          </div>
+          <div class="field">
+            <label for="login-password">Password</label>
+            <input class="input" id="login-password" name="password" type="password" required autocomplete="current-password" placeholder="••••••••">
+          </div>
+          <button type="submit" class="btn btn-primary" id="login-submit" style="margin-top: 6px;">Sign in</button>
+        </form>
+
+        <!-- 2. Registration Form -->
+        <form id="register-form" class="form-grid" style="display: none;" novalidate>
+          <div class="field">
+            <label for="reg-name">Full Name</label>
+            <input class="input" id="reg-name" name="name" type="text" required minlength="2" placeholder="e.g. Aisha Rahman">
+          </div>
+          <div class="field">
+            <label for="reg-email">Email Address</label>
+            <input class="input" id="reg-email" name="email" type="email" required placeholder="e.g. user@example.com">
+          </div>
+          <div class="field">
+            <label for="reg-phone">Phone Number</label>
+            <input class="input" id="reg-phone" name="phone" type="tel" required placeholder="e.g. 012-345 6789">
+          </div>
+          <div class="field">
+            <label for="reg-password">Password</label>
+            <input class="input" id="reg-password" name="password" type="password" required minlength="6" placeholder="At least 6 characters">
+          </div>
+          <button type="submit" class="btn btn-primary" id="reg-submit" style="margin-top: 6px;">Create Account</button>
+        </form>
+
+        <!-- 3. Admin 4-Digit Security Code (Shown upon owner/admin login) -->
+        <div id="admin-code-container" style="display: none;">
+          <div class="admin-code-box">
+            <div class="admin-code-shield">🔒</div>
+            <h3 style="font-size:15px; font-weight:700; color:var(--primary); margin-bottom:4px;">Admin Verification</h3>
+            <p style="font-size:12px; color:var(--muted); margin-bottom:12px;">Please enter your 4-digit security code to proceed.</p>
+            <form id="admin-code-form">
+              <input type="password" id="admin-pin" class="pin-input" maxlength="4" pattern="[0-9]{4}" placeholder="••••" required autofocus autocomplete="one-time-code">
+              <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+                <button type="submit" class="btn btn-primary" id="btn-verify-pin">Verify Code &amp; Enter</button>
+                <button type="button" class="btn btn-quiet btn-small" id="btn-cancel-pin">Back to Sign in</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Quick Workspace Links -->
+        <div style="margin-top: 24px; border-top: 1px solid var(--line); padding-top: 16px;">
+          <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 8px;">Workspace Portals</p>
+          <div class="portal-links">
+            <a href="./customer/customer.html" class="btn btn-quiet btn-small">Customer Portal</a>
+            <a href="./owner/owner.html" class="btn btn-quiet btn-small">Owner Dashboard</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Database Item Operations & Live Register -->
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">Service &amp; Booking Items</h2>
+            <p class="panel-sub">Manage and record booking items in the MySQL database.</p>
+          </div>
+          <button type="button" class="btn btn-quiet btn-small" id="btn-refresh-items">Refresh</button>
+        </div>
+
+        <!-- Add Item Form -->
+        <form id="item-form" class="form-grid" style="margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--line);" novalidate>
+          <div class="form-row">
+            <div class="field">
+              <label for="item-booking-id">Booking Ref</label>
+              <input class="input" id="item-booking-id" name="booking_id" type="text" required placeholder="e.g. CR-TEST-001" value="CR-TEST-001">
+            </div>
+            <div class="field">
+              <label for="item-label">Item / Service Label</label>
+              <input class="input" id="item-label" name="item_label" type="text" required placeholder="e.g. 3-Seater Sofa Clean">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label for="item-quantity">Quantity</label>
+              <input class="input" id="item-quantity" name="quantity" type="number" min="1" step="1" required value="1">
+            </div>
+            <div class="field">
+              <label for="item-unit-price">Unit Price (RM)</label>
+              <input class="input" id="item-unit-price" name="unit_price" type="number" min="0" step="0.5" required placeholder="120.00">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-secondary" id="item-submit-btn">Add Item to Database</button>
+        </form>
+
+        <!-- Live Items Table Container -->
+        <div id="items-container">
+          <div id="items-list">
+            <div class="empty-state">
+              <p>Loading items from MySQL database...</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
+
+  <!-- Shared Core & Client Logic -->
+  <script src="./shared/common.js"></script>
+  <script src="./script.js" defer></script>
 </body>
 </html>

@@ -1,27 +1,29 @@
 /**
  * CleanRide — Login & Account Creation
+ * Secure authentication module delegating all credential checks to the backend server.
  */
 (() => {
     "use strict";
 
-    const { getState, setState, uniqueId, toast } = window.CleanRide;
+    const { getState, setState, toast } = window.CleanRide;
     const state = getState();
 
+    // Base API URL for authentication
+    const AUTH_API = "http://127.0.0.1:5000/api/auth";
+
     // If already logged in, redirect immediately to the respective portal
-    if (state.session) {
-        const currentUser = state.users.find(u => u.id === state.session.id);
-        if (currentUser) {
-            if (currentUser.role === "owner") {
-                window.location.replace("../owner/owner.html");
-                return;
-            } else {
-                window.location.replace("../customer/customer.html");
-                return;
-            }
+    if (state.session && state.session.role) {
+        if (state.session.role === "owner") {
+            window.location.replace("../owner/owner.html");
+            return;
+        } else {
+            window.location.replace("../customer/customer.html");
+            return;
         }
     }
 
     let authMode = "signin";
+    let pendingAdminUsername = null; // Stored temporarily in memory during 2FA step
 
     const authHeading = document.getElementById("auth-heading");
     const authSubheading = document.getElementById("auth-subheading");
@@ -30,9 +32,13 @@
     const authForm = document.getElementById("auth-form");
     const tabSignin = document.getElementById("tab-signin");
     const tabSignup = document.getElementById("tab-signup");
+    const loginTabs = document.querySelector(".login-tabs");
+    const adminCodeContainer = document.getElementById("admin-code-container");
 
     function renderAuthFields() {
         if (!authFields) return;
+
+        hideAdminCodePrompt();
 
         if (authMode === "signin") {
             authHeading.textContent = "Sign in to CleanRide";
@@ -41,14 +47,15 @@
             tabSignin.classList.add("active");
             tabSignup.classList.remove("active");
 
+            // Generic, secure placeholder with no account hints
             authFields.innerHTML = `
                 <div class="field full">
-                    <label for="input-email">Email address</label>
-                    <input class="input" id="input-email" name="email" type="email" required autocomplete="username" placeholder="e.g. aisha@example.com">
+                    <label for="input-email">Username or Email</label>
+                    <input class="input" id="input-email" name="email" type="text" required autocomplete="username" placeholder="Enter your username or email">
                 </div>
                 <div class="field full">
                     <label for="input-password">Password</label>
-                    <input class="input" id="input-password" name="password" type="password" required minlength="6" autocomplete="current-password" placeholder="••••••••">
+                    <input class="input" id="input-password" name="password" type="password" required minlength="4" autocomplete="current-password" placeholder="••••••••">
                 </div>
             `;
         } else {
@@ -79,6 +86,116 @@
         }
     }
 
+    // Displays the 4-digit code entry view (verification handled strictly by server)
+    function showAdminCodePrompt(username) {
+        pendingAdminUsername = username;
+
+        authForm.style.display = "none";
+        if (loginTabs) loginTabs.style.display = "none";
+
+        authHeading.textContent = "Admin Security Verification";
+        authSubheading.textContent = "Two-step verification required for administrator access.";
+
+        adminCodeContainer.innerHTML = `
+            <div class="admin-code-box">
+                <div class="admin-code-shield">🔒</div>
+                <p style="font-size:12px;color:var(--ink);font-weight:600;margin-bottom:6px;">
+                    Administrator Account Verified
+                </p>
+                <p style="font-size:11px;color:var(--muted);margin-bottom:14px;">
+                    Please enter your 4-digit security code to proceed.
+                </p>
+                <form id="admin-code-form">
+                    <div class="code-input-wrapper">
+                        <input type="password" id="admin-pin" class="pin-input" maxlength="4" pattern="[0-9]{4}" placeholder="••••" required autofocus autocomplete="one-time-code">
+                    </div>
+                    <div class="code-actions">
+                        <button type="submit" class="btn btn-primary" style="width:100%" id="btn-verify-pin">Verify Code & Enter</button>
+                        <button type="button" class="btn btn-quiet btn-small" id="btn-cancel-pin">Back to Sign in</button>
+                    </div>
+                </form>
+            </div>
+        `;
+
+        adminCodeContainer.style.display = "block";
+
+        const pinInput = document.getElementById("admin-pin");
+        if (pinInput) pinInput.focus();
+
+        // Submit 4-digit code to server for secure validation
+        document.getElementById("admin-code-form")?.addEventListener("submit", async e => {
+            e.preventDefault();
+            const pinBtn = document.getElementById("btn-verify-pin");
+            const enteredPin = document.getElementById("admin-pin")?.value.trim();
+
+            if (!enteredPin || enteredPin.length !== 4) {
+                toast("Please enter a valid 4-digit code.");
+                return;
+            }
+
+            if (pinBtn) pinBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${AUTH_API}/verify-admin-code`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        code: enteredPin,
+                        username: pendingAdminUsername
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success && data.verified) {
+                    toast("Security code accepted. Access granted.");
+
+                    // Store session without passwords
+                    state.session = {
+                        id: data.user?.id || "USR-ADMIN",
+                        name: data.user?.name || pendingAdminUsername,
+                        role: "owner"
+                    };
+                    setState();
+
+                    setTimeout(() => {
+                        window.location.href = "../owner/owner.html";
+                    }, 400);
+
+                } else {
+                    toast(data.error || "Invalid 4-digit code. Access denied.");
+                    const pinEl = document.getElementById("admin-pin");
+                    if (pinEl) {
+                        pinEl.value = "";
+                        pinEl.style.borderColor = "#dc3545";
+                        pinEl.focus();
+                    }
+                }
+            } catch (err) {
+                console.error("Verification server error:", err);
+                toast("Cannot connect to server. Ensure Flask backend is running.");
+            } finally {
+                if (pinBtn) pinBtn.disabled = false;
+            }
+        });
+
+        document.getElementById("btn-cancel-pin")?.addEventListener("click", () => {
+            hideAdminCodePrompt();
+        });
+    }
+
+    function hideAdminCodePrompt() {
+        pendingAdminUsername = null;
+        if (adminCodeContainer) {
+            adminCodeContainer.innerHTML = "";
+            adminCodeContainer.style.display = "none";
+        }
+        if (authForm) authForm.style.display = "block";
+        if (loginTabs) loginTabs.style.display = "flex";
+        authHeading.textContent = "Sign in to CleanRide";
+        authSubheading.textContent = "Manage bookings and services.";
+    }
+
     tabSignin.addEventListener("click", () => {
         authMode = "signin";
         renderAuthFields();
@@ -89,76 +206,104 @@
         renderAuthFields();
     });
 
-    // Form Submission
-    authForm.addEventListener("submit", e => {
+    // Form Submission: delegates completely to backend server API
+    authForm.addEventListener("submit", async e => {
         e.preventDefault();
         if (!authForm.reportValidity()) return;
 
         const fd = new FormData(authForm);
-        const email = String(fd.get("email")).trim().toLowerCase();
+        const identifier = String(fd.get("email")).trim();
         const password = String(fd.get("password"));
 
+        authSubmit.disabled = true;
+
         if (authMode === "signin") {
-            const found = state.users.find(u => u.email.toLowerCase() === email && u.password === password);
-            if (!found) {
-                toast("Email or password is incorrect. Please try again.");
-                return;
-            }
-            state.session = { id: found.id, role: found.role };
-            setState();
-            toast(`Welcome back, ${found.name.split(" ")[0]}.`);
+            try {
+                const res = await fetch(`${AUTH_API}/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        username: identifier,
+                        password: password
+                    })
+                });
 
-            setTimeout(() => {
-                if (found.role === "owner") {
-                    window.location.href = "../owner/owner.html";
-                } else {
-                    window.location.href = "../customer/customer.html";
+                const data = await res.json();
+
+                if (!res.ok || !data.success) {
+                    toast(data.error || "Invalid username/email or password.");
+                    authSubmit.disabled = false;
+                    return;
                 }
-            }, 300);
-        } else {
-            if (state.users.some(u => u.email.toLowerCase() === email)) {
-                toast("An account already uses that email.");
-                return;
+
+                // If owner account: server signals that 4-digit code is required
+                if (data.requires_code && data.role === "owner") {
+                    showAdminCodePrompt(data.username || identifier);
+                    authSubmit.disabled = false;
+                    return;
+                }
+
+                // If customer account: save session and redirect
+                state.session = {
+                    id: data.user.id,
+                    name: data.user.name,
+                    role: "customer"
+                };
+                setState();
+                toast(`Welcome back, ${data.user.name.split(" ")[0]}.`);
+
+                setTimeout(() => {
+                    window.location.href = "../customer/customer.html";
+                }, 300);
+
+            } catch (err) {
+                console.error("Login network error:", err);
+                toast("Server unreachable. Please ensure the Python Flask backend is running.");
+                authSubmit.disabled = false;
             }
-            const newUser = {
-                id: uniqueId("USR"),
-                name: String(fd.get("name")).trim(),
-                email,
-                phone: String(fd.get("phone")).trim(),
-                password,
-                role: "customer"
-            };
-            state.users.push(newUser);
-            state.session = { id: newUser.id, role: newUser.role };
-            setState();
-            toast("Your demo account is ready.");
 
-            setTimeout(() => {
-                window.location.href = "../customer/customer.html";
-            }, 300);
-        }
-    });
+        } else {
+            // Customer Registration via backend API
+            const name = String(fd.get("name")).trim();
+            const phone = String(fd.get("phone")).trim();
 
-    // Demo Fill Helpers
-    document.getElementById("fill-customer")?.addEventListener("click", () => {
-        authMode = "signin";
-        renderAuthFields();
-        const emailInput = document.getElementById("input-email");
-        const passInput = document.getElementById("input-password");
-        if (emailInput && passInput) {
-            emailInput.value = "aisha@example.com";
-            passInput.value = "cleanride123";
-        }
-    });
+            try {
+                const res = await fetch(`${AUTH_API}/register`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        name,
+                        email: identifier,
+                        phone,
+                        password
+                    })
+                });
 
-    document.getElementById("fill-owner")?.addEventListener("click", () => {
-        authMode = "signin";
-        renderAuthFields();
-        const emailInput = document.getElementById("input-email");
-        const passInput = document.getElementById("input-password");
-        if (emailInput && passInput) {
-            emailInput.value = "owner@cleanride.my";
-            passInput.value = "owner123";
+                const data = await res.json();
+
+                if (!res.ok || !data.success) {
+                    toast(data.error || "Registration failed. Please try again.");
+                    authSubmit.disabled = false;
+                    return;
+                }
+
+                state.session = {
+                    id: data.user.id,
+                    name: data.user.name,
+                    role: "customer"
+                };
+                setState();
+                toast("Account created successfully!");
+
+                setTimeout(() => {
+                    window.location.href = "../customer/customer.html";
+                }, 300);
+
+            } catch (err) {
+                console.error("Registration network error:", err);
+                toast("Server unreachable. Please ensure the Python Flask backend is running.");
+                authSubmit.disabled = false;
+            }
         }
     });
 
