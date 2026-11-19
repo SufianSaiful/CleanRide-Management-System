@@ -1032,6 +1032,26 @@
         }
 
         setState();
+
+        // Synchronize equipment to MySQL
+        if (id) {
+            fetch(`http://127.0.0.1:5000/api/equipment/${encodeURIComponent(id)}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, category, serial, location, status, condition, hourlyRate, notes })
+            })
+            .then(res => res.json())
+            .catch(err => console.error("[CleanRide] Error updating equipment in MySQL:", err));
+        } else {
+            fetch("http://127.0.0.1:5000/api/equipment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: newId, name, category, serial: serial || `SN-${newId}`, location, status, condition, hourlyRate, notes })
+            })
+            .then(res => res.json())
+            .catch(err => console.error("[CleanRide] Error adding equipment to MySQL:", err));
+        }
+
         closeModal();
         renderView("equipment");
     }
@@ -1224,6 +1244,23 @@
         }
 
         setState();
+
+        // Synchronize job changes to MySQL backend
+        fetch(`http://127.0.0.1:5000/api/bookings/${encodeURIComponent(id)}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                status,
+                appointment_date: date,
+                arrival_window: String(fd.get("time")),
+                payment_amount: amount,
+                method: String(fd.get("method")),
+                paymentNote: String(fd.get("paymentNote") || "Payment recorded")
+            })
+        })
+        .then(res => res.json())
+        .catch(err => console.error("[CleanRide] Error updating booking in MySQL:", err));
+
         closeModal();
         renderView(activePage);
         toast("Job details updated.");
@@ -1238,6 +1275,15 @@
         }
         b.status = "Confirmed";
         setState();
+
+        fetch(`http://127.0.0.1:5000/api/bookings/${encodeURIComponent(id)}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: "Confirmed" })
+        })
+        .then(res => res.json())
+        .catch(err => console.error("[CleanRide] Error confirming booking in MySQL:", err));
+
         renderView(activePage);
         toast("Appointment confirmed.");
     }
@@ -1313,6 +1359,15 @@
                     if (r) r.status = "Rejected";
                 }
                 setState();
+
+                fetch(`http://127.0.0.1:5000/api/bookings/${encodeURIComponent(id)}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ status: "Rejected" })
+                })
+                .then(res => res.json())
+                .catch(err => console.error("[CleanRide] Error rejecting booking in MySQL:", err));
+
                 renderView(activePage);
                 toast("Request declined and capacity released.");
             }
@@ -1345,6 +1400,13 @@
         if (action === "equipment-confirm-delete") {
             state.equipment = (state.equipment || []).filter(e => e.id !== id);
             setState();
+
+            fetch(`http://127.0.0.1:5000/api/equipment/${encodeURIComponent(id)}`, {
+                method: "DELETE"
+            })
+            .then(res => res.json())
+            .catch(err => console.error("[CleanRide] Error deleting equipment in MySQL:", err));
+
             closeModal();
             renderView("equipment");
             toast("Equipment item removed from inventory.");
@@ -1383,6 +1445,15 @@
             if (c) {
                 c.response = responseText || "";
                 setState();
+
+                fetch(`http://127.0.0.1:5000/api/complaints/${encodeURIComponent(id)}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ team_response: responseText })
+                })
+                .then(res => res.json())
+                .catch(err => console.error("[CleanRide] Error saving complaint response in MySQL:", err));
+
                 renderView(activePage);
                 toast("Response saved.");
             }
@@ -1392,6 +1463,15 @@
             if (c) {
                 c.status = c.status === "Resolved" ? "In review" : "Resolved";
                 setState();
+
+                fetch(`http://127.0.0.1:5000/api/complaints/${encodeURIComponent(id)}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ status: c.status })
+                })
+                .then(res => res.json())
+                .catch(err => console.error("[CleanRide] Error resolving complaint in MySQL:", err));
+
                 renderView(activePage);
                 toast(c.status === "Resolved" ? "Conversation marked resolved." : "Conversation reopened.");
             }
@@ -1473,6 +1553,18 @@
             Object.keys(state.pricing.vehicle).forEach(k => state.pricing.vehicle[k] = Number(fd.get(`veh_${k}`)));
             Object.keys(state.pricing.rental).forEach(k => state.pricing.rental[k] = Number(fd.get(`rent_${k}`)));
             setState();
+
+            fetch("http://127.0.0.1:5000/api/settings", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    capacity: state.capacity,
+                    pricing: state.pricing
+                })
+            })
+            .then(res => res.json())
+            .catch(err => console.error("[CleanRide] Error saving settings to MySQL:", err));
+
             renderView("settings");
             toast("Pricing and daily capacity saved.");
         }

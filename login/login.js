@@ -11,14 +11,41 @@
     // Base API URL for authentication
     const AUTH_API = "http://127.0.0.1:5000/api/auth";
 
-    // If already logged in, redirect immediately to the respective portal
-    if (state.session && state.session.role) {
-        if (state.session.role === "owner") {
-            window.location.replace("../owner/owner.html");
-            return;
+    // Helper to store session and synchronize state.users
+    function saveSessionUser(userData, fallbackRole = "customer") {
+        const sessionUser = {
+            id: userData.id || (fallbackRole === "owner" ? "USR-ADMIN-01" : "USR-DEMO"),
+            name: userData.name || (fallbackRole === "owner" ? "Admin CleanRide" : "Customer"),
+            email: userData.email || "",
+            phone: userData.phone || "",
+            role: userData.role || fallbackRole
+        };
+        state.session = sessionUser;
+        if (!Array.isArray(state.users)) state.users = [];
+        const idx = state.users.findIndex(u => u.id === sessionUser.id);
+        if (idx >= 0) {
+            state.users[idx] = sessionUser;
         } else {
-            window.location.replace("../customer/customer.html");
-            return;
+            state.users.push(sessionUser);
+        }
+        setState();
+    }
+
+    // If already logged in, verify session validity before redirecting to prevent bounce loops
+    if (state.session && state.session.role) {
+        const u = (state.users || []).find(x => x.id === state.session.id);
+        if (u) {
+            if (u.role === "owner") {
+                window.location.replace("../owner/owner.html");
+                return;
+            } else {
+                window.location.replace("../customer/customer.html");
+                return;
+            }
+        } else {
+            // Desynced session — clear to prevent redirect loop
+            state.session = null;
+            setState();
         }
     }
 
@@ -150,13 +177,8 @@
                 if (response.ok && data.success && data.verified) {
                     toast("Security code accepted. Access granted.");
 
-                    // Store session without passwords
-                    state.session = {
-                        id: data.user?.id || "USR-ADMIN",
-                        name: data.user?.name || pendingAdminUsername,
-                        role: "owner"
-                    };
-                    setState();
+                    // Store session and sync users list
+                    saveSessionUser(data.user || { id: "USR-ADMIN-01", name: pendingAdminUsername }, "owner");
 
                     setTimeout(() => {
                         window.location.href = "../owner/owner.html";
@@ -244,13 +266,8 @@
                 }
 
                 // If customer account: save session and redirect
-                state.session = {
-                    id: data.user.id,
-                    name: data.user.name,
-                    role: "customer"
-                };
-                setState();
-                toast(`Welcome back, ${data.user.name.split(" ")[0]}.`);
+                saveSessionUser(data.user, "customer");
+                toast(`Welcome back, ${(data.user.name || "Customer").split(" ")[0]}.`);
 
                 setTimeout(() => {
                     window.location.href = "../customer/customer.html";
@@ -287,12 +304,7 @@
                     return;
                 }
 
-                state.session = {
-                    id: data.user.id,
-                    name: data.user.name,
-                    role: "customer"
-                };
-                setState();
+                saveSessionUser(data.user, "customer");
                 toast("Account created successfully!");
 
                 setTimeout(() => {
