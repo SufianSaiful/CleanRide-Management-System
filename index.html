@@ -4,42 +4,359 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#143c54">
-  <meta name="description" content="CleanRide service booking and operations">
-  <title>CleanRide — Service operations</title>
+  <meta name="description" content="CleanRide - Home Care & Equipment Services Management">
+  <title>CleanRide — Service &amp; Operations Management</title>
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
-  <link rel="stylesheet" href="./shared/common.css">
-  <script>
-    // Intelligent root routing based on existing session
-    (() => {
-      try {
-        const saved = JSON.parse(localStorage.getItem("cleanride-demo-v1"));
-        if (saved && saved.session) {
-          const user = (saved.users || []).find(u => u.id === saved.session.id);
-          if (user && user.role === "owner") {
-            window.location.replace("./owner/owner.html");
-            return;
-          } else if (user && user.role === "customer") {
-            window.location.replace("./customer/customer.html");
-            return;
-          }
-        }
-      } catch (e) {}
-      window.location.replace("./login/login.html");
-    })();
-  </script>
+  <link rel="stylesheet" href="./style.css">
 </head>
-<body style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f4f8f9;text-align:center;padding:20px">
-  <div class="panel" style="max-width:440px;width:100%">
-    <div class="brand" style="justify-content:center;padding-bottom:15px">
-      <div class="brand-mark">CR</div>
-      <div class="brand-name">CleanRide<small>Home care services</small></div>
-    </div>
-    <p style="color:var(--muted);font-size:13px;margin-bottom:20px">Redirecting to your workspace...</p>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <a href="./login/login.html" class="btn btn-primary">Go to Sign in</a>
-      <a href="./customer/customer.html" class="btn btn-secondary">Customer Portal</a>
-      <a href="./owner/owner.html" class="btn btn-secondary">Owner Workspace</a>
-    </div>
+<body>
+  <div class="app-container">
+    <!-- Main Top Header -->
+    <header class="app-header">
+      <a href="./index.html" class="brand">
+        <div class="brand-mark">CR</div>
+        <div class="brand-name">
+          CleanRide
+          <small>Home Care &amp; Operations Management</small>
+        </div>
+      </a>
+      <div class="header-links">
+        <div id="user-badge-container" style="display: none;">
+          <span class="user-badge" id="current-user-badge">Logged in</span>
+          <button type="button" class="btn btn-quiet btn-small" id="header-logout-btn" style="color:#ffffff; border-color:rgba(255,255,255,0.3);">Sign out</button>
+        </div>
+        <a href="./customer/customer.html" class="btn btn-secondary btn-small">Customer Portal</a>
+        <a href="./owner/owner.html" class="btn btn-quiet btn-small" style="color:#ffffff; border-color:rgba(255,255,255,0.3);">Owner Workspace</a>
+      </div>
+    </header>
+
+    <!-- Dedicated Non-Shifting Status / Alert Container -->
+    <div id="status-container" class="status-container" role="alert" aria-live="polite"></div>
+
+    <!-- Main Dashboard Two-Column Layout -->
+    <main class="dashboard-grid">
+      <!-- Left Column: Authentication & Registration -->
+      <section class="panel" id="auth-panel">
+        <div class="panel-head">
+          <div>
+            <h1 class="panel-title" id="auth-title">Account Access</h1>
+            <p class="panel-sub" id="auth-subtitle">Sign in or register your CleanRide account.</p>
+          </div>
+        </div>
+
+        <!-- Auth Mode Toggle Tabs -->
+        <div class="login-tabs" role="tablist" id="auth-tabs">
+          <button type="button" class="active" id="tab-signin" role="tab">Sign in</button>
+          <button type="button" id="tab-signup" role="tab">Create account</button>
+        </div>
+
+        <!-- 1. Sign In Form -->
+        <form id="login-form" class="form-grid" novalidate>
+          <div class="field">
+            <label for="login-username">Username or Email</label>
+            <input class="input" id="login-username" name="username" type="text" required autocomplete="username" placeholder="Enter your username or email">
+          </div>
+          <div class="field">
+            <label for="login-password">Password</label>
+            <input class="input" id="login-password" name="password" type="password" required autocomplete="current-password" placeholder="••••••••">
+          </div>
+          <button type="submit" class="btn btn-primary" id="login-submit" style="margin-top: 6px;">Sign in</button>
+        </form>
+
+        <!-- 2. Registration Form -->
+        <form id="register-form" class="form-grid" style="display: none;" novalidate>
+          <div class="field">
+            <label for="reg-name">Full Name</label>
+            <input class="input" id="reg-name" name="name" type="text" required minlength="2" placeholder="e.g. Aisha Rahman">
+          </div>
+          <div class="field">
+            <label for="reg-email">Email Address</label>
+            <input class="input" id="reg-email" name="email" type="email" required placeholder="e.g. user@example.com">
+          </div>
+          <div class="field">
+            <label for="reg-phone">Phone Number</label>
+            <input class="input" id="reg-phone" name="phone" type="tel" required placeholder="e.g. 012-345 6789">
+          </div>
+          <div class="field">
+            <label for="reg-password">Password</label>
+            <input class="input" id="reg-password" name="password" type="password" required minlength="6" placeholder="At least 6 characters">
+          </div>
+          <button type="submit" class="btn btn-primary" id="reg-submit" style="margin-top: 6px;">Create Account</button>
+        </form>
+
+        <!-- 3. Admin 4-Digit Security Code (Shown upon owner/admin login) -->
+        <div id="admin-code-container" style="display: none;">
+          <div class="admin-code-box">
+            <div class="admin-code-shield">🔒</div>
+            <h3 style="font-size:15px; font-weight:700; color:var(--primary); margin-bottom:4px;">Admin Verification</h3>
+            <p style="font-size:12px; color:var(--muted); margin-bottom:12px;">Please enter your 4-digit security code to proceed.</p>
+            <form id="admin-code-form">
+              <input type="password" id="admin-pin" class="pin-input" maxlength="4" pattern="[0-9]{4}" placeholder="••••" required autofocus autocomplete="one-time-code">
+              <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+                <button type="submit" class="btn btn-primary" id="btn-verify-pin">Verify Code &amp; Enter</button>
+                <button type="button" class="btn btn-quiet btn-small" id="btn-cancel-pin">Back to Sign in</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Quick Workspace Links -->
+        <div style="margin-top: 24px; border-top: 1px solid var(--line); padding-top: 16px;">
+          <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 8px;">Workspace Portals</p>
+          <div class="portal-links">
+            <a href="./customer/customer.html" class="btn btn-quiet btn-small">Customer Portal</a>
+            <a href="./owner/owner.html" class="btn btn-quiet btn-small">Owner Dashboard</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Operations Panel with Live Database Control -->
+      <section class="panel" id="operations-panel">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title" id="ops-panel-title">Operations &amp; Live Register</h2>
+            <p class="panel-sub" id="ops-panel-sub">Every operation connects directly to the MySQL database via Flask API.</p>
+          </div>
+        </div>
+
+        <!-- Operation Tabs (Equipment, Items, Bookings, Complaints) -->
+        <div class="login-tabs" role="tablist" id="ops-tabs">
+          <button type="button" class="active" id="tab-equipment" role="tab">Equipment</button>
+          <button type="button" id="tab-items" role="tab">Service Items</button>
+          <button type="button" id="tab-bookings" role="tab">Bookings</button>
+          <button type="button" id="tab-complaints" role="tab">Complaints</button>
+        </div>
+
+        <!-- 1. Equipment Tracking Section -->
+        <div id="equipment-section">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <div>
+              <h3 style="font-size:15px; font-weight:700; color:var(--primary);">Add Equipment Item</h3>
+              <p style="font-size:12px; color:var(--muted);">Persists to MySQL equipment register with instant auto-refresh.</p>
+            </div>
+            <button type="button" class="btn btn-quiet btn-small" id="btn-refresh-equipment">Refresh</button>
+          </div>
+
+          <form id="equipment-form" class="form-grid" style="margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--line);" novalidate>
+            <div class="form-row">
+              <div class="field">
+                <label for="eq-name">Equipment Name</label>
+                <input class="input" id="eq-name" name="name" type="text" required placeholder="e.g. Industrial Carpet Extractor">
+              </div>
+              <div class="field">
+                <label for="eq-category">Category</label>
+                <select class="select" id="eq-category" name="category">
+                  <option value="Extractor">Extractor</option>
+                  <option value="Steam Cleaner">Steam Cleaner</option>
+                  <option value="Air Mover">Air Mover / Dryer</option>
+                  <option value="Rotary Scrubber">Rotary Scrubber</option>
+                  <option value="Vacuum Detailing">Vacuum Detailing</option>
+                  <option value="Chemical Sprayer">Chemical Sprayer</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="field">
+                <label for="eq-serial">Serial / Tag #</label>
+                <input class="input" id="eq-serial" name="serial" type="text" placeholder="e.g. SN-EXT-8801">
+              </div>
+              <div class="field">
+                <label for="eq-location">Location</label>
+                <input class="input" id="eq-location" name="location" type="text" value="HQ Store" placeholder="e.g. HQ Store, Van 1">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="field">
+                <label for="eq-condition">Physical Condition</label>
+                <select class="select" id="eq-condition" name="condition">
+                  <option value="Good" selected>Good</option>
+                  <option value="New">New</option>
+                  <option value="Fair">Fair</option>
+                  <option value="Needs Service">Needs Service</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="eq-rate">Hourly Rate (RM)</label>
+                <input class="input" id="eq-rate" name="hourly_rate" type="number" min="0" step="5" value="65.00" placeholder="65.00">
+              </div>
+            </div>
+            <div class="field">
+              <label for="eq-notes">Notes / Maintenance Log</label>
+              <input class="input" id="eq-notes" name="notes" type="text" placeholder="e.g. Includes 10m high-pressure solution hose">
+            </div>
+            <button type="submit" class="btn btn-secondary" id="eq-submit-btn">Add Equipment to Database</button>
+          </form>
+
+          <!-- Live Equipment Table Container -->
+          <div id="equipment-container">
+            <div id="equipment-list">
+              <div class="empty-state">
+                <p>Loading equipment from MySQL database...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Service & Booking Items Section -->
+        <div id="items-section" style="display: none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <div>
+              <h3 style="font-size:15px; font-weight:700; color:var(--primary);">Add Service Item</h3>
+              <p style="font-size:12px; color:var(--muted);">Records item lines linked to bookings in MySQL.</p>
+            </div>
+            <button type="button" class="btn btn-quiet btn-small" id="btn-refresh-items">Refresh</button>
+          </div>
+
+          <form id="item-form" class="form-grid" style="margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--line);" novalidate>
+            <div class="form-row">
+              <div class="field">
+                <label for="item-booking-id">Booking Ref</label>
+                <input class="input" id="item-booking-id" name="booking_id" type="text" required placeholder="e.g. CR-TEST-001" value="CR-TEST-001">
+              </div>
+              <div class="field">
+                <label for="item-label">Item / Service Label</label>
+                <input class="input" id="item-label" name="item_label" type="text" required placeholder="e.g. 3-Seater Sofa Clean">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="field">
+                <label for="item-quantity">Quantity</label>
+                <input class="input" id="item-quantity" name="quantity" type="number" min="1" step="1" required value="1">
+              </div>
+              <div class="field">
+                <label for="item-unit-price">Unit Price (RM)</label>
+                <input class="input" id="item-unit-price" name="unit_price" type="number" min="0" step="0.5" required placeholder="120.00">
+              </div>
+            </div>
+            <button type="submit" class="btn btn-secondary" id="item-submit-btn">Add Item to Database</button>
+          </form>
+
+          <!-- Live Items Table Container -->
+          <div id="items-container">
+            <div id="items-list">
+              <div class="empty-state">
+                <p>Loading items from MySQL database...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Bookings Section -->
+        <div id="bookings-section" style="display: none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <div>
+              <h3 style="font-size:15px; font-weight:700; color:var(--primary);">Direct Booking Entry</h3>
+              <p style="font-size:12px; color:var(--muted);">Inserts directly into bookings table in MySQL.</p>
+            </div>
+            <button type="button" class="btn btn-quiet btn-small" id="btn-refresh-bookings">Refresh</button>
+          </div>
+
+          <form id="booking-form" class="form-grid" style="margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--line);" novalidate>
+            <div class="form-row">
+              <div class="field">
+                <label for="bk-service">Service Type</label>
+                <select class="select" id="bk-service" name="service">
+                  <option value="upholstery">Upholstery cleaning</option>
+                  <option value="carpet">Carpet cleaning</option>
+                  <option value="vehicle">Vehicle interior</option>
+                  <option value="rental">Equipment rental</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="bk-date">Appointment Date</label>
+                <input class="input" id="bk-date" name="date" type="date" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="field">
+                <label for="bk-time">Arrival Window</label>
+                <select class="select" id="bk-time" name="time">
+                  <option value="09:00">09:00</option>
+                  <option value="11:00">11:00</option>
+                  <option value="13:00">13:00</option>
+                  <option value="15:00">15:00</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="bk-total">Total Amount (RM)</label>
+                <input class="input" id="bk-total" name="total" type="number" min="1" step="0.5" value="120.00" required>
+              </div>
+            </div>
+            <div class="field">
+              <label for="bk-address">Service Address</label>
+              <input class="input" id="bk-address" name="address" type="text" required placeholder="Street address, city">
+            </div>
+            <div class="field">
+              <label for="bk-instructions">Special Instructions</label>
+              <input class="input" id="bk-instructions" name="instructions" type="text" placeholder="Access notes, parking...">
+            </div>
+            <button type="submit" class="btn btn-secondary" id="bk-submit-btn">Save Booking to MySQL</button>
+          </form>
+
+          <!-- Live Bookings Table Container -->
+          <div id="bookings-container">
+            <div id="bookings-list">
+              <div class="empty-state">
+                <p>Loading bookings from MySQL database...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Complaints Section -->
+        <div id="complaints-section" style="display: none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <div>
+              <h3 style="font-size:15px; font-weight:700; color:var(--primary);">Lodge Feedback / Complaint</h3>
+              <p style="font-size:12px; color:var(--muted);">Stores customer feedback and responses directly in MySQL.</p>
+            </div>
+            <button type="button" class="btn btn-quiet btn-small" id="btn-refresh-complaints">Refresh</button>
+          </div>
+
+          <form id="complaint-form" class="form-grid" style="margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--line);" novalidate>
+            <div class="form-row">
+              <div class="field">
+                <label for="cp-booking-id">Booking Ref</label>
+                <input class="input" id="cp-booking-id" name="bookingId" type="text" required placeholder="e.g. CR-TEST-001" value="CR-TEST-001">
+              </div>
+              <div class="field">
+                <label for="cp-category">Category</label>
+                <select class="select" id="cp-category" name="category">
+                  <option value="Service quality">Service quality</option>
+                  <option value="Appointment timing">Appointment timing</option>
+                  <option value="Billing question">Billing question</option>
+                  <option value="Equipment rental">Equipment rental</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label for="cp-subject">Subject</label>
+              <input class="input" id="cp-subject" name="subject" type="text" required placeholder="Short summary of feedback">
+            </div>
+            <div class="field">
+              <label for="cp-description">Feedback Description</label>
+              <input class="input" id="cp-description" name="description" type="text" required placeholder="Detailed message">
+            </div>
+            <button type="submit" class="btn btn-secondary" id="cp-submit-btn">Lodge Feedback in MySQL</button>
+          </form>
+
+          <!-- Live Complaints Table Container -->
+          <div id="complaints-container">
+            <div id="complaints-list">
+              <div class="empty-state">
+                <p>Loading feedback records from MySQL database...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
+
+  <!-- Shared Core & Client Logic -->
+  <script src="./shared/common.js"></script>
+  <script src="./script.js" defer></script>
 </body>
 </html>

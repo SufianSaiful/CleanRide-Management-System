@@ -644,9 +644,11 @@
 
         state.bookings.push(b);
 
+        let rentalId = null;
         if (b.service === "rental") {
+            rentalId = uniqueId("RN");
             state.rentals.push({
-                id: uniqueId("RN"),
+                id: rentalId,
                 bookingId: b.id,
                 userId: b.userId,
                 name: b.name,
@@ -659,6 +661,63 @@
         }
 
         setState();
+
+        // Synchronize booking, items, details and deposit to MySQL database
+        fetch("http://127.0.0.1:5000/api/bookings", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                id: b.id,
+                user_id: b.userId || user?.id,
+                customer_name: b.name || user?.name,
+                customer_email: b.email || user?.email,
+                customer_phone: b.phone || user?.phone,
+                address: b.address,
+                appointment_date: b.date,
+                arrival_window: b.time,
+                service_type: b.service,
+                dirtiness: b.dirtiness || "Moderate",
+                instructions: b.instructions || "",
+                base_price: b.base,
+                surcharge: b.surcharge,
+                total_amount: b.total,
+                deposit_amount: b.deposit,
+                paid_amount: b.paid,
+                balance_amount: b.balance,
+                status: b.status,
+                payment_status: b.paymentStatus,
+                payment_method: method,
+                items: (b.items || []).map(i => ({
+                    label: i.label,
+                    qty: i.qty,
+                    unit_price: i.unit,
+                    total_price: Number((i.qty * i.unit).toFixed(2))
+                })),
+                upholstery_type: b.upholsteryType,
+                quantity: b.quantity,
+                area_sqm: b.area,
+                vehicle_type: b.vehicleType,
+                registration_number: b.registration,
+                seats: b.seats,
+                fleet_count: b.fleet,
+                rental_id: rentalId,
+                equipment_type: b.equipment,
+                rental_start_date: b.rentalStart,
+                rental_hours: b.rentalHours
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) {
+                console.error("[CleanRide] MySQL save booking error:", data);
+            } else {
+                console.log("[CleanRide] Booking successfully saved to MySQL:", data);
+            }
+        })
+        .catch(err => {
+            console.error("[CleanRide] Network error saving booking to MySQL:", err);
+        });
+
         selectedBookingDraft = null;
         closeModal();
         renderView("appointments");
@@ -818,6 +877,15 @@
                     }
                 }
                 setState();
+
+                fetch(`http://127.0.0.1:5000/api/bookings/${encodeURIComponent(id)}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ status: "Cancelled" })
+                })
+                .then(res => res.json())
+                .catch(err => console.error("[CleanRide] Error saving cancellation to MySQL:", err));
+
                 closeModal();
                 renderView(activePage);
                 toast("Booking cancelled and capacity released.");
@@ -842,6 +910,18 @@
                     requestedAt: new Date().toISOString()
                 };
                 setState();
+
+                fetch(`http://127.0.0.1:5000/api/bookings/${encodeURIComponent(id)}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        reschedule_date: d,
+                        reschedule_time: String(fd.get("time"))
+                    })
+                })
+                .then(res => res.json())
+                .catch(err => console.error("[CleanRide] Error saving reschedule request to MySQL:", err));
+
                 closeModal();
                 renderView(activePage);
                 toast("Reschedule request sent to the team.");
@@ -897,7 +977,7 @@
                 return;
             }
 
-            state.complaints.push({
+            const complaintObj = {
                 id: uniqueComplaintId(),
                 bookingId: b.id,
                 userId: user.id,
@@ -909,9 +989,38 @@
                 status: "In review",
                 response: "",
                 createdAt: new Date().toISOString()
+            };
+
+            state.complaints.push(complaintObj);
+            setState();
+
+            // Synchronize complaint to MySQL database
+            fetch("http://127.0.0.1:5000/api/complaints", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id: complaintObj.id,
+                    booking_id: complaintObj.bookingId,
+                    user_id: complaintObj.userId,
+                    category: complaintObj.category,
+                    subject: complaintObj.subject,
+                    description: complaintObj.description,
+                    incident_date: complaintObj.date,
+                    status: complaintObj.status
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    console.error("[CleanRide] MySQL save complaint error:", data);
+                } else {
+                    console.log("[CleanRide] Complaint successfully saved to MySQL:", data);
+                }
+            })
+            .catch(err => {
+                console.error("[CleanRide] Network error saving complaint to MySQL:", err);
             });
 
-            setState();
             renderView("reports");
             toast("Feedback sent. The team will follow up here.");
         }

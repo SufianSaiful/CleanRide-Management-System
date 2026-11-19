@@ -115,44 +115,62 @@
     box-shadow: 0 2px 7px rgba(25, 63, 80, .07);
 }
 
-.demo-credentials {
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 12px;
-    margin-top: 17px;
-    font-size: 11px;
-    color: #647c89;
-    line-height: 1.6;
-    background: #fafcfd;
-}
-
-.demo-credentials strong {
-    color: #35596b;
-}
-
-.demo-chip-group {
-    display: flex;
-    gap: 8px;
-    margin-top: 8px;
-}
-
-.demo-chip {
-    flex: 1;
-    border: 1px dashed #9bc3ce;
-    background: #eff6f8;
-    color: #1a566f;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 6px 8px;
-    border-radius: 6px;
-    cursor: pointer;
+/* ADMIN 4-DIGIT VERIFICATION CODE STYLES */
+.admin-code-box {
+    background: #ffffff;
+    border: 1px solid #d0e0e5;
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 4px 18px rgba(20, 60, 84, 0.06);
+    margin-top: 10px;
     text-align: center;
-    transition: background .15s, border-color .15s;
 }
 
-.demo-chip:hover {
-    background: #dbecef;
-    border-color: #559db0;
+.admin-code-shield {
+    width: 48px;
+    height: 48px;
+    background: #e2f2f4;
+    color: #143c54;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 12px;
+}
+
+.code-input-wrapper {
+    margin: 18px 0;
+}
+
+.pin-input {
+    width: 100%;
+    max-width: 240px;
+    height: 54px;
+    text-align: center;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: 14px;
+    padding-left: 20px;
+    border: 2px solid #5ab7bb;
+    border-radius: 10px;
+    background: #f7fbfc;
+    color: #143c54;
+    transition: all 0.2s ease;
+}
+
+.pin-input:focus {
+    border-color: #143c54;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(90, 183, 187, 0.25);
+    outline: none;
+}
+
+.code-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
 }
 
 /* RESPONSIVE */

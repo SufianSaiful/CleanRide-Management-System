@@ -120,7 +120,23 @@
 
     const money = n => `RM ${Number(n || 0).toLocaleString("en-MY", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-    const getCurrentUser = () => state.users.find(u => u.id === state.session?.id);
+    const getCurrentUser = () => {
+        if (!state.session || !state.session.id) return null;
+        if (!Array.isArray(state.users)) state.users = [];
+        let u = state.users.find(x => x.id === state.session.id);
+        if (!u) {
+            u = {
+                id: state.session.id,
+                name: state.session.name || (state.session.role === "owner" ? "Admin" : "Customer"),
+                email: state.session.email || "",
+                phone: state.session.phone || "",
+                role: state.session.role || "customer"
+            };
+            state.users.push(u);
+            save(state);
+        }
+        return u;
+    };
 
     const isOwner = () => state.session?.role === "owner";
     const isCustomer = () => state.session?.role === "customer";
@@ -294,6 +310,8 @@
     function requireAuth(expectedRole) {
         const u = getCurrentUser();
         if (!state.session || !u) {
+            state.session = null;
+            save(state);
             window.location.replace("../login/login.html");
             return false;
         }
